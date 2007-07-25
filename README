@@ -8,19 +8,27 @@ turning your site into a photo or image gallery a snap.
 Copyright
 --------------------------------------------------
 
-Snapr is Free Software; you can redistribute it and/or modify it under the
-terms of the GNU General Public License as published by the Free Software
-Foundation; either Version 2 of the License, or (at your option) any later
-version.
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; version 2 dated June, 1991.
 
-Snapr is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY; without even the implied warranties of MERCHANTABILITY or FITNESS FOR
-A PARTICULAR PURPOSE. See the GNU General Public License for details.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with
-this package; if not, please consult the Enano CMS website at
-<http://enanocms.org/>, or view a copy of the GNU General Public license with
-the GPL file included with the official Enano distribution files.
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+02111-1307, USA.
+
+Alternatively, you may view a copy of the GNU General Public License in the
+file "COPYING" included with this distribution, or at the following URL:
+
+  <http://enanocms.org/Special:GNU_General_Public_License>
+
+If you already have Enano set up, you can view a copy of the GPL by searching
+for "GNU General Public License".
 
 Installing Snapr
 --------------------------------------------------
