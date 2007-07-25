@@ -228,6 +228,15 @@ function page_Special_GalleryUpload()
           
           if ( $target_folder )
           {
+            // Make sure we're not trying to move a folder to itself or a subdirectory of itself
+            
+            $children = gal_fetch_all_children(intval($img_data['id']));
+            if ( $img_data['id'] == $target_folder || in_array($target_folder, $children) )
+            {
+              $errors[] = 'You are trying to move a folder to itself, or to a subdirectory of itself, which is not allowed. If done manually (i.e. via an SQL client) this will result in infinite loops in the folder sorting code.';
+              break 2;
+            }
+            
             $to_update['folder_parent'] = $target_folder;
           }
           
@@ -349,7 +358,7 @@ function page_Special_GalleryUpload()
           $folder = sanitize_page_id($folder);
         }
         $folders = array_reverse($folders);
-        $gal_href = implode('/', $folders) . '/' . sanitize_page_id($row['img_title']);
+        $gal_href = implode('/', $folders) . ( count($folders) > 0 ? '/' : '' ) . sanitize_page_id($row['img_title']);
         
         echo '<div class="tblholder">
                 <table border="0" cellspacing="1" cellpadding="4">';
