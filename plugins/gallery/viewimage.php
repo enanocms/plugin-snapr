@@ -200,7 +200,7 @@ function gallery_namespace_handler(&$page)
   
   if ( $perms->get_permissions('gal_full_res') )
   {
-    echo '<a href="' . $img_href . '" title="Click to view this image at full resolution, right click to save image" onclick="window.open(this.href, \'\', \'toolbar=no,address=no,menus=no,status=no\'); return false;">';
+    echo '<a href="' . $img_href . '" title="Click to view this image at full resolution, right click to save image" onclick="window.open(this.href, \'\', \'toolbar=no,address=no,menus=no,status=no,scrollbars=yes\'); return false;">';
   }
   
   echo '<img alt="Image preview (640px max width)" src="' . $img_url . '" style="border-width: 0; margin-bottom: 5px; display: block;" />';

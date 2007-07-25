@@ -41,6 +41,26 @@ function page_Special_GalleryUpload()
   $template->add_header('<link rel="stylesheet" type="text/css" href="' . scriptPath . '/plugins/gallery/dropdown.css" />');
   $template->add_header('<script type="text/javascript" src="' . scriptPath . '/plugins/gallery/gallery-bits.js"></script>');
   
+  $max_size = @ini_get('upload_max_filesize');
+  $max_size_field = '';
+  if ( $max_size )
+  {
+    if ( preg_match('/M$/i', $max_size) )
+    {
+      $max_size = intval($max_size) * 1048576;
+    }
+    else if ( preg_match('/K$/i', $max_size) )
+    {
+      $max_size = intval($max_size) * 1024;
+    }
+    else if ( preg_match('/G$/i', $max_size) )
+    {
+      $max_size = intval($max_size) * 1048576 * 1024;
+    }
+    $max_size = intval($max_size);
+    $max_size_field = "\n" . '<input type="hidden" name="MAX_FILE_SIZE" value="' . $max_size . '" />' . "\n";
+  }
+  
   if ( isset($_GET['edit_img']) )
   {
     $edit_parms = $_GET['edit_img'];
@@ -284,6 +304,8 @@ function page_Special_GalleryUpload()
     
     echo '<form action="' . makeUrlNS('Special', 'GalleryUpload', 'edit_img=' . $edit_parms, true) . '" method="post" enctype="multipart/form-data">';
     
+    echo $max_size_field;
+    
     if ( $row = $db->fetchrow($e) )
     {
       
@@ -486,7 +508,7 @@ function page_Special_GalleryUpload()
                 echo gallery_hier_formfield('override_folder', false);
               ?>
               <br />
-              <a href="#" onclick="gal_unset_radios('override_folder'); return false;">Unselect folder override field</a>
+              <a href="#" onclick="gal_unset_radios('override_folder'); return false;">Unselect field</a>
             </div>
           </div>
         </td>
@@ -594,6 +616,7 @@ function page_Special_GalleryUpload()
       $template->header();
       
       echo '<form action="' . makeUrlNS('Special', 'GalleryUpload', 'rm=' . $rm_id, true) . '" method="post" enctype="multipart/form-data">';
+      echo $max_size_field;
       
       echo '<h3>Are you sure you want to delete this item?</h3>';
       echo '<p>If you continue, this item will be permanently deleted from the gallery &ndash; no rollbacks.</p>';
@@ -954,6 +977,7 @@ function page_Special_GalleryUpload()
   <?php
   
   echo '<form action="' . makeUrlNS('Special', 'GalleryUpload') . '" enctype="multipart/form-data" method="post">';
+  echo $max_size_field;
   if ( count($errors) > 0 )
   {
     echo '<div class="error-box">

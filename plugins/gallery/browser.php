@@ -163,8 +163,9 @@ function page_Special_Gallery()
   $breadcrumb_urlcache = '';
   
   // CSS for gallery browser
-  $template->add_header('<link rel="stylesheet" href="' . scriptPath . '/plugins/gallery/browser.css" type="text/css" />');
-  $template->add_header('<link rel="stylesheet" href="' . scriptPath . '/plugins/gallery/dropdown.css" type="text/css" />');
+  // Moved to search.php
+  //$template->add_header('<link rel="stylesheet" href="' . scriptPath . '/plugins/gallery/browser.css" type="text/css" />');
+  //$template->add_header('<link rel="stylesheet" href="' . scriptPath . '/plugins/gallery/dropdown.css" type="text/css" />');
   
   $header = $template->getHeader();
   
@@ -225,6 +226,45 @@ function page_Special_Gallery()
     // Nothing in this folder, for one of two reasons:
     //   1) The folder doesn't exist
     //   2) The folder exists but doesn't have any images in it
+    
+    if ( sizeof($folders) < 1 )
+    {
+      // Nothing in the root folder
+      
+      $first_row['folder_id'] = 'NULL';
+      if ( $session->user_level >= USER_LEVEL_ADMIN && isset($_POST['create_folder']) && isset($first_row['folder_id']) )
+      {
+        if ( empty($_POST['create_folder']) )
+        {
+          $f_errors[] = 'Please enter a folder name.';
+        }
+        if ( $_POST['create_folder'] == '_id' )
+        {
+          $f_errors[] = 'The name "_id" is reserved for internal functions and cannot be used on any image or folder.';
+        }
+        if ( count($f_errors) < 1 )
+        {
+          $q = $db->sql_query('INSERT INTO '.table_prefix.'gallery(img_title, is_folder, folder_parent) VALUES(\'' . $db->escape($_POST['create_folder']) . '\', 1, ' . $first_row['folder_id'] . ');');
+          if ( !$q )
+            $db->_die();
+          redirect(makeUrl($paths->fullpage), 'Folder created', 'The folder "' . htmlspecialchars($_POST['create_folder']) . '" has been created. Redirecting to last viewed folder...', 2);
+        }
+      }
+      
+      $html = '';
+      if ( $session->user_level >= USER_LEVEL_ADMIN )
+      {
+        $html .= '<p><a href="' . makeUrlNS('Special', 'GalleryUpload') . '">Upload an image</a></p>';
+        $html .= '<div class="select-outer">Create new folder';
+        $html .= '<div class="select-inner" style="padding-top: 4px;">';
+        $html .= '<form action="' . makeUrl($paths->fullpage) . '" method="post">';
+        $html .= '<input type="text" name="create_folder" size="30" /> <input type="submit" value="Create" />';
+        $html .= '</form></div>';
+        $html .= '</div><div class="select-pad">&nbsp;</div><br />';
+      }
+      
+      die_friendly('No images', '<p>No images have been uploaded to the gallery yet.</p>' . $html);
+    }
     
     /*
     $folders_old = $folders;
@@ -303,8 +343,16 @@ function page_Special_Gallery()
   
   $f_errors = array();
   
-  if ( $session->user_level >= USER_LEVEL_ADMIN && isset($_POST['create_folder']) && isset($first_row['folder_id']) )
+  if ( $session->user_level >= USER_LEVEL_ADMIN && isset($_POST['create_folder']) )
   {
+    if ( !isset($first_row['folder_id']) )
+    {
+      $first_row['folder_id'] =& $first_row['img_id'];
+    }
+    if ( !isset($first_row['folder_id']) )
+    {
+      $f_errors[] = 'Internal error getting parent folder ID';
+    }
     if ( empty($_POST['create_folder']) )
     {
       $f_errors[] = 'Please enter a folder name.';
@@ -435,7 +483,7 @@ function page_Special_Gallery()
   
   $per_page = $rows_in_browser * 5;
   
-  $html = paginate($img_query, '{img_id}', $db->numrows($img_query), makeUrl($paths->fullpage, 'start=%s', true), $start, $per_page, $callers, '<table border="0" cellspacing="8"><tr>', '</tr></table>');
+  $html = paginate($img_query, '{img_id}', $db->numrows($img_query), makeUrl($paths->fullpage, 'sort=' . $sort_column . '&order=' . $sort_order . '&start=%s', true), $start, $per_page, $callers, '<table border="0" cellspacing="8"><tr>', '</tr></table>');
   echo $html;
   
   if ( $session->user_level >= USER_LEVEL_ADMIN )

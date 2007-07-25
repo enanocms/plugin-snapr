@@ -34,8 +34,11 @@ if ( !getConfig('gallery_version') )
                         img_time_mod int(12) NOT NULL DEFAULT 0,
                         PRIMARY KEY ( img_id )
                       );');
+  
   if ( !$q )
     $db->_die();
+  
+  $q = $db->sql_query('CREATE FULLTEXT INDEX '.table_prefix.'gal_idx ON '.table_prefix.'gallery(img_title, img_desc);');
   
   setConfig('gallery_version', GALLERY_VERSION);
 }
@@ -46,5 +49,6 @@ require( ENANO_ROOT . '/plugins/gallery/viewimage.php' );
 require( ENANO_ROOT . '/plugins/gallery/browser.php' );
 require( ENANO_ROOT . '/plugins/gallery/upload.php' );
 require( ENANO_ROOT . '/plugins/gallery/fetcher.php' );
+require( ENANO_ROOT . '/plugins/gallery/search.php' );
 
 ?>
