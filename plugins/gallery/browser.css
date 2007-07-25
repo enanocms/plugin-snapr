@@ -1,0 +1,24 @@
+/*
+ * CSS for gallery browser
+ */
+
+div.gallery_icon {
+  border-width: 1px;
+  border-style: solid;
+  border-color: #FFFFFF;
+  cursor: pointer;
+  text-align: center;
+  display: table;
+  margin: 0 auto;
+  padding: 4px;
+}
+
+div.gallery_icon:hover {
+  border-color: #CCCCCC;
+}
+
+div.gallery_icon img.gallery_thumb {
+  display: block;
+  border-width: 0;
+  margin: 0 auto 6px auto;
+}

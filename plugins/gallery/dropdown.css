@@ -1,0 +1,76 @@
+div.select-outer {
+  border-width: 1px;
+  border-style: solid;
+  border-color: #FFFFFF;
+  padding: 3px 21px 3px 3px !important;
+  cursor: pointer;
+  display: table;
+  background-image: url(chevron.gif);
+  background-position: 95% 8px;
+  background-repeat: no-repeat;
+  background-color: #FFFFFF;
+  position: absolute;
+  font-family: arial, sans-serif;
+  font-size: 8pt;
+  margin: 4px 0 0 0 !important;
+  text-align: left;
+}
+div.select-outer:hover {
+  border-color: #CCCCCC;
+  background-image: url(chevron-prelight.gif);
+}
+div.select-inner {
+  display: none;
+  background-color: #FFFFFF;
+  margin-right: -18px;
+}
+div.select-outer:hover div.select-inner {
+  display: block;
+}
+div.select-inner a {
+  display: block;
+  padding: 2px;
+  color: #000000;
+}
+div.select-inner a:hover {
+  display: block;
+  color: #0000FF;
+  background-color: #F0F0FF;
+}
+
+div.toggle {
+  border: 1px solid #2c458a;
+  background-color: #F0FDFF;
+  padding: 1px;
+  margin: 10px 0;
+}
+
+div.toggle div.head {
+  line-height: 22px;
+  background-image: url(toggle-head-bg.gif);
+  padding: 2px 7px 0 7px;
+  margin: 0;
+  color: #FFFFFF;
+  cursor: pointer;
+}
+
+div.toggle div.head img.toggler {
+  float: right;
+  margin: 3px;
+  display: block;
+}
+
+div.toggle div.body {
+  background-color: #e3e7f3;
+  border: 1px solid #849ad6;
+  padding: 10px;
+  margin: 1px 0 0 0;
+  display: none;
+  max-height: 300px;
+  clip: rect(0px,auto,auto,0px);
+  overflow: auto;
+}
+
+div.toggle div.body label:hover {
+  background-color: #f3f7ff;
+}

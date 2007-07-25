@@ -1,0 +1,8 @@
+Snapr - Image gallery in a snap!
+Another fine plugin for Enano CMS
+
+TODO:
+--------------------------------------------------
+
+[ ] Figure out a PageProcessor hack to make ACLs work for folders as well as images
+[ ] Possibly rename Special:GalleryUpload to something more accurate, as it's become a one-for-everything administration center for the gallery

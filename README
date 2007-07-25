@@ -1,0 +1,45 @@
+Snapr - Image gallery in a snap!
+Another fine plugin for Enano CMS
+--------------------------------------------------
+
+Welcome and thanks for downloading Snapr, the Enano plugin designed to make
+turning your site into a photo or image gallery a snap.
+
+Copyright
+--------------------------------------------------
+
+Snapr is Free Software; you can redistribute it and/or modify it under the
+terms of the GNU General Public License as published by the Free Software
+Foundation; either Version 2 of the License, or (at your option) any later
+version.
+
+Snapr is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranties of MERCHANTABILITY or FITNESS FOR
+A PARTICULAR PURPOSE. See the GNU General Public License for details.
+
+You should have received a copy of the GNU General Public License along with
+this package; if not, please consult the Enano CMS website at
+<http://enanocms.org/>, or view a copy of the GNU General Public license with
+the GPL file included with the official Enano distribution files.
+
+Installing Snapr
+--------------------------------------------------
+
+To install the Snapr plugin on your site, just extract the zip or tarball file
+into your Enano root folder. If you need to upload Snapr manually, upload the
+file plugins/Gallery.php and the entire folder plugins/gallery/ to the
+plugins/ folder inside your Enano root.
+
+To enable Snapr plugin, go to the Administration panel, expand General, click
+Manage Plugins, and click Enable in the row showing the Snapr plugin.
+
+Obtaining support
+--------------------------------------------------
+
+Support for Snapr is available via the same support channels as Enano, as it
+is developed and maintained by the official Enano team. For support options,
+both free and commercial, please see <http://enanocms.org/Contact_us>.
+
+Have fun!
+
+-- The Enano team
