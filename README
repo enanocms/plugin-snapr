@@ -28,7 +28,7 @@ file "COPYING" included with this distribution, or at the following URL:
   <http://enanocms.org/Special:GNU_General_Public_License>
 
 If you already have Enano set up, you can view a copy of the GPL by searching
-for "GNU General Public License".
+for "GNU General Public License" on your Enano site.
 
 Installing Snapr
 --------------------------------------------------
@@ -40,6 +40,32 @@ plugins/ folder inside your Enano root.
 
 To enable Snapr plugin, go to the Administration panel, expand General, click
 Manage Plugins, and click Enable in the row showing the Snapr plugin.
+
+Snapr was developed to be compatible with Enano 1.0, however the copy of Enano
+it was developed under was a 1.0.1 Mercurial pull. If you experience
+compatibility issues with Snapr, they'll probably be fixed with an upgrade to
+the latest copy of Enano in the official Mercurial repository:
+
+  <http://nighthawk.enanocms.org/hg/enano>
+
+Using Snapr
+--------------------------------------------------
+
+The first thing you should do once you get the plugin enabled is go to Edit the
+Sidebar and add a link to Special:Gallery (or Special.Gallery if you use the
+Windows compatibility patch) using normal wikilink syntax. This will enable
+users to access your gallery browser without having to search around. From
+there, you can browse through the gallery (it's empty by default) and create
+folders as needed. Images can be moved in between folders using the Edit Image
+links on each image page or through the drop-down menu that shows when you
+hover over an image title in the gallery browser.
+
+Snapr also hooks into the sidebar and search subsystems. You can add a block to
+your sidebar that shows a random image from Snapr's gallery by going to Edit
+The Sidebar -> Create New Block, selecting Use Code from a Plugin, and
+selecting "Random Image" from the dropdown menu. The search hook is automatic;
+whenever you perform a search, image results will be displayed on the search
+page.
 
 Obtaining support
 --------------------------------------------------
