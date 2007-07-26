@@ -40,6 +40,14 @@ if ( !getConfig('gallery_version') )
   
   $q = $db->sql_query('CREATE FULLTEXT INDEX '.table_prefix.'gal_idx ON '.table_prefix.'gallery(img_title, img_desc);');
   
+  if ( !$q )
+    $db->_die();
+  
+  $q = $db->sql_query('INSERT INTO '.table_prefix.'gallery(img_title,img_desc,img_filename,img_time_upload,img_time_mod) VALUES(\'Welcome to Snapr!\', \'You\'\'re past the hard part - Snapr is set up and working on your server. What you\'\'re looking at now is what most users will see when they look at an image in your gallery. The next step is to [[Special:GalleryUpload|upload some images]]. After that, make your gallery publicly accessible by adding a link to the [[Special:Gallery|browser]], if you haven\'\'t already done so. See the README file included with Snapr for more information.\', \'snapr-logo.png\', UNIX_TIMESTAMP(), UNIX_TIMESTAMP());');
+  
+  if ( !$q )
+    $db->_die();
+  
   setConfig('gallery_version', GALLERY_VERSION);
 }
 
