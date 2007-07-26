@@ -50,5 +50,6 @@ require( ENANO_ROOT . '/plugins/gallery/browser.php' );
 require( ENANO_ROOT . '/plugins/gallery/upload.php' );
 require( ENANO_ROOT . '/plugins/gallery/fetcher.php' );
 require( ENANO_ROOT . '/plugins/gallery/search.php' );
+require( ENANO_ROOT . '/plugins/gallery/sidebar.php' );
 
 ?>
