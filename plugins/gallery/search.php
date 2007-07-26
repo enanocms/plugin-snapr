@@ -29,10 +29,10 @@ function gal_searcher($q, $offset)
   global $db, $session, $paths, $template, $plugins; // Common objects
   
   $fulltext_col = 'MATCH(img_title, img_desc) AGAINST (\'' . $db->escape($q) . '\' IN BOOLEAN MODE)';
-  $sql = "SELECT img_id, img_title, img_desc, $fulltext_col AS score, CHAR_LENGTH(img_desc) AS length FROM ".table_prefix."gallery
+  $sql = "SELECT img_id, img_title, img_desc, is_folder, $fulltext_col AS score, CHAR_LENGTH(img_desc) AS length FROM ".table_prefix."gallery
               WHERE $fulltext_col > 0
-                AND is_folder=0
-              ORDER BY score DESC;";
+                AND ( ( is_folder=1 AND folder_parent IS NULL ) OR is_folder!=1 )
+              ORDER BY is_folder DESC, score DESC, img_title ASC;";
   if ( !$db->sql_unbuffered_query($sql) )
   {
     echo $db->get_error();
@@ -43,11 +43,14 @@ function gal_searcher($q, $offset)
   {
     echo '<table border="0" cellspacing="8"><tr>';
     $renderer = new SnaprFormatter();
+    $fullpage = $paths->fullpage;
+    $paths->fullpage = $paths->nslist['Special'] . 'Gallery';
     do
     {
       echo $renderer->render(false, $row, false);
     }
     while ( $row = $db->fetchrow() );
+    $paths->fullpage = $fullpage;
     echo '</tr></table>';
   }
   else

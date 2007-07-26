@@ -86,6 +86,11 @@ class SnaprFormatter
       $image_url  = makeUrlNS('Special', 'GalleryFetcher/thumb/' . $row['img_id']);
     }
     
+    if ( isset($row['score']) )
+    {
+      $row['score'] = number_format($row['score'], 2);
+    }
+    
     $image_url_js = addslashes($image_link);
     $jsclick = ( $session->user_level < USER_LEVEL_ADMIN ) ? ' onclick="window.location=\'' . $image_url_js . '\'"' : '';
     
@@ -96,11 +101,11 @@ class SnaprFormatter
     
     if ( $session->user_level < USER_LEVEL_ADMIN )
     {
-      $out .= $title_safe;
+      $out .= $title_safe . ( isset($row['score']) ? "<br /><small>Relevance: {$row['score']}</small>" : '' );
     }
     else if ( $session->user_level >= USER_LEVEL_ADMIN )
     {
-      $out .= '<div class="menu_nojs" style="text-align: center;"><a href="#" onclick="return false;" style="margin: 0 auto;">' . $title_safe . '</a>';
+      $out .= '<div class="menu_nojs" style="text-align: center;"><a href="#" onclick="return false;" style="width: 74px;">' . $title_safe . ( isset($row['score']) ? "<br /><small>Relevance: {$row['score']}</small>" : '' ) . '</a>';
       
       $url_delete = makeUrlNS('Special', 'GalleryUpload', 'rm=' . $row['img_id'], true);
       $url_edit   = makeUrlNS('Special', 'GalleryUpload', 'edit_img=' . $row['img_id'], true);
