@@ -390,7 +390,7 @@ function page_Special_GalleryUpload()
           <td class="row2">Move to folder:</td>
           <td class="row1">
             <div class="toggle">
-              <div class="head" onclick="gal_toggle(this.nextSibling.nextSibling, this.childNodes[1]);">
+              <div class="head" onclick="gal_toggle( ( IE ? this.nextSibling : this.nextSibling.nextSibling ), this.childNodes[1]);">
                 <img alt="&gt;&gt;" src="<?php echo scriptPath; ?>/plugins/gallery/toggle-closed.png" class="toggler" />
                 Select folder
               </div>
@@ -465,7 +465,7 @@ function page_Special_GalleryUpload()
           <td class="row2">Move to folder:</td>
           <td class="row1">
             <div class="toggle">
-              <div class="head" onclick="gal_toggle(this.nextSibling.nextSibling, this.childNodes[1]);">
+              <div class="head" onclick="gal_toggle( ( IE ? this.nextSibling : this.nextSibling.nextSibling ), this.childNodes[1]);">
                 <img alt="&gt;&gt;" src="<?php echo scriptPath; ?>/plugins/gallery/toggle-closed.png" class="toggler" />
                 Select folder
               </div>
@@ -508,7 +508,7 @@ function page_Special_GalleryUpload()
         <td class="row2">Move all to folder:<br /><small>Other folder fields on this page can override this for individual images.</small></td>
         <td class="row1" style="width: 70%;">
           <div class="toggle">
-            <div class="head" onclick="gal_toggle(this.nextSibling.nextSibling, this.childNodes[1]);">
+            <div class="head" onclick="gal_toggle( ( IE ? this.nextSibling : this.nextSibling.nextSibling ), this.childNodes[1]);">
               <img alt="&gt;&gt;" src="<?php echo scriptPath; ?>/plugins/gallery/toggle-closed.png" class="toggler" />
               Select folder
             </div>
@@ -1062,7 +1062,7 @@ function page_Special_GalleryUpload()
         <td class="row2">Upload to folder:</td>
         <td class="row1">
           <div class="toggle">
-            <div class="head" onclick="gal_toggle(this.nextSibling.nextSibling, this.childNodes[1]);">
+            <div class="head" onclick="gal_toggle( ( IE ? this.nextSibling : this.nextSibling.nextSibling ), this.childNodes[1]);">
               <img alt="&gt;&gt;" src="<?php echo scriptPath; ?>/plugins/gallery/toggle-closed.png" class="toggler" />
               Select folder
             </div>

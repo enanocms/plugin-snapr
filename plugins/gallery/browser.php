@@ -352,8 +352,7 @@ function page_Special_Gallery()
   {
     if ( !isset($first_row['folder_id']) )
     {
-      // $first_row['folder_id'] =& $first_row['img_id'];
-      $first_row['folder_id'] = 'NULL';
+      $first_row['folder_id'] =& $first_row['img_id'];
     }
     if ( !isset($first_row['folder_id']) )
     {
@@ -489,21 +488,8 @@ function page_Special_Gallery()
   
   $per_page = $rows_in_browser * 5;
   
-  if ( $db->numrows($img_query) < 1 )
-  {
-    $html = '';
-    if ( $session->user_level >= USER_LEVEL_ADMIN )
-    {
-      $html .= '<p><a href="' . makeUrlNS('Special', 'GalleryUpload', 'folder=' . $first_row['img_id'], true) . '">Upload an image</a></p>';
-    }
-    
-    echo '<p>There are no items in this folder.</p>' . $html;
-  }
-  else
-  {
-    $html = paginate($img_query, '{img_id}', $db->numrows($img_query), makeUrl($paths->fullpage, 'sort=' . $sort_column . '&order=' . $sort_order . '&start=%s', true), $start, $per_page, $callers, '<table border="0" cellspacing="8"><tr>', '</tr></table>');
-    echo $html;
-  }
+  $html = paginate($img_query, '{img_id}', $db->numrows($img_query), makeUrl($paths->fullpage, 'sort=' . $sort_column . '&order=' . $sort_order . '&start=%s', false), $start, $per_page, $callers, '<table border="0" cellspacing="8"><tr>', '</tr></table>');
+  echo $html;
   
   if ( $session->user_level >= USER_LEVEL_ADMIN )
   {
