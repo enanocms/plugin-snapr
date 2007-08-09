@@ -50,7 +50,7 @@ function page_Special_GalleryFetcher()
     $type = 'preview';
   }
   
-  $q = $db->sql_query('SELECT img_filename, img_time_mod, is_folder FROM '.table_prefix.'gallery WHERE img_id=' . $id . ';');
+  $q = $db->sql_query('SELECT img_title, img_filename, img_time_mod, is_folder FROM '.table_prefix.'gallery WHERE img_id=' . $id . ';');
   if ( !$q )
     $db->_die();
   
@@ -64,10 +64,12 @@ function page_Special_GalleryFetcher()
     case 'thumb':
       $filename = ENANO_ROOT . '/cache/' . $row['img_filename'] . '-thumb.jpg';
       $mimetype = 'image/jpeg';
+      $ext = "jpg";
       break;
     case 'preview':
       $filename = ENANO_ROOT . '/cache/' . $row['img_filename'] . '-preview.jpg';
       $mimetype = 'image/jpeg';
+      $ext = "jpg";
       break;
     case 'full':
       $filename = ENANO_ROOT . '/files/' . $row['img_filename'];
@@ -109,7 +111,22 @@ function page_Special_GalleryFetcher()
   header('Content-length: ' . strlen($contents));
   header('Last-Modified: '  . date('r', $row['img_time_mod']));
   
+  if ( isset($_GET['download']) )
+  {
+    // determine an appropriate non-revealing filename
+    $filename = str_replace(' ', '_', $row['img_title']);
+    $filename = preg_replace('/([^\w\._-]+)/', '-', $filename);
+    $filename = trim($filename, '-');
+    $filename .= ".$ext";
+    header('Content-disposition: attachment; filename=' . $filename);
+  }
+  
   echo $contents;
+  
+  gzip_output();
+  
+  $db->close();
+  exit;
   
 }
 

@@ -36,7 +36,7 @@ function gallery_namespace_handler(&$page)
     $img_id = intval($page->page_id);
     if ( !$img_id )
       return false;
-    $q = $db->sql_query('SELECT img_id, img_title, img_desc, print_sizes, img_time_upload, img_time_mod, folder_parent FROM '.table_prefix.'gallery WHERE img_id=' . $img_id . ';');
+    $q = $db->sql_query('SELECT img_id, img_title, img_desc, print_sizes, img_time_upload, img_time_mod, img_filename, folder_parent FROM '.table_prefix.'gallery WHERE img_id=' . $img_id . ';');
     if ( !$q )
       $db->_die();
   }
@@ -61,7 +61,7 @@ function gallery_namespace_handler(&$page)
     
     $folders = array_reverse($folders);
     // This is one of the best MySQL tricks on the market. We're going to reverse-travel a folder path using LEFT JOIN and the incredible power of metacoded SQL
-    $sql = 'SELECT g0.img_id, g0.img_title, g0.img_desc, g0.print_sizes, g0.img_time_upload, g0.img_time_mod, g0.folder_parent FROM '.table_prefix.'gallery AS g0';
+    $sql = 'SELECT g0.img_id, g0.img_title, g0.img_desc, g0.print_sizes, g0.img_time_upload, g0.img_time_mod, g0.img_filename, g0.folder_parent FROM '.table_prefix.'gallery AS g0';
     $where = "\n  " . 'WHERE g0.img_title=\'' . $db->escape($folders[0]) . '\'';
     foreach ( $folders as $i => $folder )
     {
@@ -257,9 +257,14 @@ function gallery_namespace_handler(&$page)
   // By the time I got to this point, it was 1:32AM (I was on vacation) and my 5-hour playlist on my iPod had been around about 3 times today.
   // So I'm glad this is like the last thing on the list tonight.
   
+  $ext = get_file_extension($row['img_filename']);
+  $ext = strtoupper($ext);
+  
   echo '<tr><th colspan="2">Image details</th></tr>';
   echo '<tr><td class="row2">Uploaded:</td><td class="row1">' . date('F d, Y h:i a', $row['img_time_upload']) . '</td></tr>';
   echo '<tr><td class="row2">Last modified:</td><td class="row1">' . date('F d, Y h:i a', $row['img_time_mod']) . '</td></tr>';
+  echo '<tr><td class="row2">Original format:</td><td class="row1">' . $ext . '</td></tr>';
+  echo '<tr><td class="row3" colspan="2" style="text-align: center;"><a href="' . makeUrlNS('Special', 'GalleryFetcher/full/' . $img_id, 'download', 'true') . '">Download image</a></td></tr>';
           
   echo '</table></div>';
   
