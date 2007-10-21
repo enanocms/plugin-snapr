@@ -383,16 +383,16 @@ function page_Special_Gallery()
   }
   
   // From here, this breadcrumb stuff is a piece of... sourdough French bread :-) *smacks lips*
-  echo '<div class="tblholder" style="padding: 4px; margin-bottom: 7px;">';
+  echo '<div class="breadcrumbs" style="padding: 4px; margin-bottom: 7px;">';
   // Upload image link for admins
   if ( $session->user_level >= USER_LEVEL_ADMIN )
   {
     echo '<div style="float: right; font-size: smaller;">';
-    echo '<b><a href="' . makeUrlNS('Special', 'GalleryUpload') . '">Upload new image(s)</a></b>';
+    echo '<a href="' . makeUrlNS('Special', 'GalleryUpload') . '">Upload new image(s)</a>';
     echo '</div>';
   }
   // The actual breadcrumbs
-  echo '<b><small>' . implode(' &raquo; ', $breadcrumbs) . '</small></b>';
+  echo '<small>' . implode(' &raquo; ', $breadcrumbs) . '</small>';
   echo '</div>';
   
   // "Edit all" link

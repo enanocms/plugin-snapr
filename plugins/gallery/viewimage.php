@@ -189,9 +189,9 @@ function gallery_namespace_handler(&$page)
   $breadcrumbs[] = htmlspecialchars($row['img_title']);
   
   // From here, this breadcrumb stuff is a piece of... sourdough French bread :-) *smacks lips*
-  echo '<div class="tblholder" style="padding: 4px; margin-bottom: 7px;">';
+  echo '<div class="breadcrumbs" style="padding: 4px; margin-bottom: 7px;">';
   // The actual breadcrumbs
-  echo '<b><small>' . implode(' &raquo; ', $breadcrumbs) . '</small></b>';
+  echo '<small>' . implode(' &raquo; ', $breadcrumbs) . '</small>';
   echo '</div>';
   
   echo '<div style="text-align: center; margin: 10px auto; border: 1px solid #DDDDDD; padding: 7px 10px; display: table;">';
