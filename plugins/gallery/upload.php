@@ -139,12 +139,8 @@ function page_Special_GalleryUpload()
                 $errors[] = "Could not delete $thumb_filename";
                 break 2;
               }
-              $magick = getConfig('imagemagick_path');
-              $command = "$magick '{$filename}' -resize ".'"'."80x80>".'"'." -quality 85 $thumb_filename";
               
-              @system($command, $stat);
-              
-              if ( !file_exists($thumb_filename) )
+              if ( !scale_image($filename, $thumb_filename, 80, 80) )
               {
                 $errors[] = 'Couldn\'t scale image '.$i.': ImageMagick failed us';
                 break 2;
@@ -157,16 +153,13 @@ function page_Special_GalleryUpload()
                 $errors[] = "Could not delete $preview_filename";
                 break 2;
               }
-              $magick = getConfig('imagemagick_path');
-              $command = "$magick '{$filename}' -resize ".'"'."640x640>".'"'." -quality 85 $preview_filename";
               
-              @system($command, $stat);
-              
-              if ( !file_exists($preview_filename) )
+              if ( !scale_image($filename, $preview_filename, 640, 480) )
               {
                 $errors[] = 'Couldn\'t scale image '.$i.': ImageMagick failed us';
                 break 2;
               }
+              
               $to_update['img_time_mod'] = strval(time());
             }
           }
@@ -737,9 +730,6 @@ function page_Special_GalleryUpload()
           // Time for some unzipping fun.
           //
           
-          // for debugging only
-          system('rm -fr ' . ENANO_ROOT . '/cache/temp');
-          
           error_reporting(E_ALL);
           
           mkdir(ENANO_ROOT . '/cache/temp') or $errors[] = 'Could not create temporary directory for extraction.';
@@ -837,14 +827,19 @@ function page_Special_GalleryUpload()
             
             $idlist[] = $db->insert_id();
             
+            //
+            // Create scaled images
+            //
+            
             // Create thumbnail image
             $thumb_filename = ENANO_ROOT . '/cache/' . $stored_name . '-thumb.jpg';
-            $magick = getConfig('imagemagick_path');
-            $command = "$magick '{$store}' -resize ".'"'."80x80>".'"'." -quality 85 $thumb_filename";
+            if ( !unlink($thumb_filename) )
+            {
+              $errors[] = "Could not delete $thumb_filename";
+              break 2;
+            }
             
-            @system($command, $stat);
-            
-            if ( !file_exists($thumb_filename) )
+            if ( !scale_image($store, $thumb_filename, 80, 80) )
             {
               $errors[] = 'Couldn\'t scale image '.$i.': ImageMagick failed us';
               break 2;
@@ -852,12 +847,13 @@ function page_Special_GalleryUpload()
             
             // Create preview image
             $preview_filename = ENANO_ROOT . '/cache/' . $stored_name . '-preview.jpg';
-            $magick = getConfig('imagemagick_path');
-            $command = "$magick '{$store}' -resize ".'"'."640x640>".'"'." -quality 85 $preview_filename";
+            if ( !unlink($preview_filename) )
+            {
+              $errors[] = "Could not delete $preview_filename";
+              break 2;
+            }
             
-            @system($command, $stat);
-            
-            if ( !file_exists($preview_filename) )
+            if ( !scale_image($store, $preview_filename, 640, 640) )
             {
               $errors[] = 'Couldn\'t scale image '.$i.': ImageMagick failed us';
               break 2;
