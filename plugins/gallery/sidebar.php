@@ -38,7 +38,7 @@ function gal_sidebar_block()
     $rand = array_rand($images);
     $image = $images[$rand];
     $acl = $session->fetch_page_acl(strval($rand), 'Gallery');
-    if ( $acl->get_permissions('read') )
+    if ( is_object($acl) && $acl->get_permissions('read') )
     {
       $my_image = $image;
       break;

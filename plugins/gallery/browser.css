@@ -11,6 +11,8 @@ div.gallery_icon {
   display: table;
   margin: 0 auto;
   padding: 4px;
+  width: 80px;
+  white-space: nowrap;
 }
 
 div.gallery_icon:hover {
@@ -20,5 +22,28 @@ div.gallery_icon:hover {
 div.gallery_icon img.gallery_thumb {
   display: block;
   border-width: 0;
-  margin: 0 auto 6px auto;
+  margin: auto auto 6px auto;
 }
+
+ul.snapr-gallery {
+  list-style-type: none !important;
+  list-style-image: none !important;
+  margin-left: 0;
+  padding-left: 0;
+}
+
+ul.snapr-gallery li.snapr-icon {
+  float: left;
+  list-style-type: none !important;
+  list-style-image: none !important;
+  width: 80px;
+  margin-right: 15px;
+}
+
+a.snapr-imagelink {
+  display: block;
+  height: 80px;
+  vertical-align: middle;
+}
+
+
