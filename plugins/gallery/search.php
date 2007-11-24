@@ -28,7 +28,7 @@ $plugins->attachHook('compile_template', '
 function gal_searcher($q, $offset)
 {
   global $db, $session, $paths, $template, $plugins; // Common objects
-  if ( defined('SNAPR_SEARCH_USING_NEW_API') )
+  if ( defined('SNAPR_SEARCH_USING_NEW_API') || version_compare(enano_version(true), '1.0.2', '>=') )
     return false;
   
   $fulltext_col = 'MATCH(img_title, img_desc) AGAINST (\'' . $db->escape($q) . '\' IN BOOLEAN MODE)';
@@ -128,7 +128,7 @@ function snapr_search_new_api(&$query, &$query_phrase, &$scores, &$page_data, &$
   {
     do
     {
-      $idstring = 'ns=Image;pid=' . $row['img_id'];
+      $idstring = 'ns=Gallery;pid=' . $row['img_id'];
       foreach ( $word_list as $term )
       {
         if ( $case_sensitive )
@@ -173,7 +173,7 @@ function snapr_search_new_api(&$query, &$query_phrase, &$scores, &$page_data, &$
           'score' => $scores[$idstring],
           'page_note' => '[Gallery image]',
           'page_id' => strval($row['img_id']),
-          'namespace' => 'Image',
+          'namespace' => 'Gallery',
           'page_length' => strlen($row['img_desc']),
         );
       }
