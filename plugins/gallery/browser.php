@@ -37,20 +37,6 @@ class SnaprFormatter
 {
   
   /**
-   * Counter for how many cells we've printed out in this row.
-   * @var int
-   */
-  
-  var $cell_count = 0;
-  
-  /**
-   * Icons to print per row.
-   * @var int
-   */
-  
-  var $icons_per_row = 5;
-  
-  /**
    * Main render method, called from pagination function
    * @access private
    */
@@ -59,14 +45,7 @@ class SnaprFormatter
   {
     global $db, $session, $paths, $template, $plugins; // Common objects
     
-    $out = '';
-    
-    if ( $this->cell_count == $this->icons_per_row )
-    {
-      $out .= '</tr><tr>';
-      $this->cell_count = 0;
-    }
-    $this->cell_count++;
+    $out = '<li class="snapr-icon">';
     
     $title_safe = $row['img_title'];
     $title_safe = htmlspecialchars($title_safe);
@@ -94,18 +73,17 @@ class SnaprFormatter
     $image_url_js = addslashes($image_link);
     $jsclick = ( $session->user_level < USER_LEVEL_ADMIN ) ? ' onclick="window.location=\'' . $image_url_js . '\'"' : '';
     
-    $out .= '<td style="text-align: center;">
-            <div class="gallery_icon"' . $jsclick . '>';
+    $out .= '<div class="gallery_icon"' . $jsclick . '>';
     
-    $out .= '<a href="' . $image_link . '"><img alt="&lt;Thumbnail&gt;" class="gallery_thumb" src="' . $image_url . '" /></a>';
+    $out .= '<a class="snapr-imagelink" href="' . $image_link . '"><img alt="&lt;Thumbnail&gt;" class="gallery_thumb" src="' . $image_url . '" /></a>';
     
     if ( $session->user_level < USER_LEVEL_ADMIN )
     {
-      $out .= $title_safe . ( isset($row['score']) ? "<br /><small>Relevance: {$row['score']}</small>" : '' );
+      $out .= '<span class="snapr-icon-label">' . $title_safe . ( isset($row['score']) ? "<br /><small>Relevance: {$row['score']}</small>" : '' ) . '</span>';
     }
     else if ( $session->user_level >= USER_LEVEL_ADMIN )
     {
-      $out .= '<div class="menu_nojs" style="text-align: center;"><a href="#" onclick="return false;" style="width: 74px;">' . $title_safe . ( isset($row['score']) ? "<br /><small>Relevance: {$row['score']}</small>" : '' ) . '</a>';
+      $out .= '<div class="menu_nojs snapr-icon-label" style="text-align: center;"><a href="#" onclick="return false;" style="width: 74px;">' . $title_safe . ( isset($row['score']) ? "<br /><small>Relevance: {$row['score']}</small>" : '' ) . '</a>';
       
       $url_delete = makeUrlNS('Special', 'GalleryUpload', 'rm=' . $row['img_id'], true);
       $url_edit   = makeUrlNS('Special', 'GalleryUpload', 'edit_img=' . $row['img_id'], true);
@@ -121,7 +99,7 @@ class SnaprFormatter
     
     $out .= '  </div>';
     
-    $out .= '</td>';
+    $out .= '</li>';
     
     return $out;
   }
@@ -486,9 +464,9 @@ function page_Special_Gallery()
     $start = intval($_GET['start']);
   }
   
-  $per_page = $rows_in_browser * 5;
+  $per_page = 25;
   
-  $html = paginate($img_query, '{img_id}', $db->numrows($img_query), makeUrl($paths->fullpage, 'sort=' . $sort_column . '&order=' . $sort_order . '&start=%s', false), $start, $per_page, $callers, '<table border="0" cellspacing="8"><tr>', '</tr></table>');
+  $html = paginate($img_query, '{img_id}', $db->numrows($img_query), makeUrl($paths->fullpage, 'sort=' . $sort_column . '&order=' . $sort_order . '&start=%s', false), $start, $per_page, $callers, '<ul class="snapr-gallery">', '</ul><span class="menuclear"></span>');
   echo $html;
   
   if ( $session->user_level >= USER_LEVEL_ADMIN )
