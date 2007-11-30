@@ -156,7 +156,7 @@ function snapr_search_new_api(&$query, &$query_phrase, &$scores, &$page_data, &$
               ' . $text . '
             </td>
             <td valign="top" style="text-align: right; width: 80px; padding-left: 10px;">
-              <a href="' . makeUrlNS('Image', $row['img_id']) . '"><img alt="[thumbnail]" src="' . makeUrlNS('Special', "GalleryFetcher/thumb/{$row['img_id']}") . '" /></a>
+              <a href="' . makeUrlNS('Gallery', $row['img_id']) . '"><img alt="[thumbnail]" src="' . makeUrlNS('Special', "GalleryFetcher/thumb/{$row['img_id']}") . '" /></a>
             </td>
           </tr>
         </table>
