@@ -118,26 +118,10 @@ function page_Special_Gallery()
   // Determine number of pictures per page
   $template->load_theme();
   
-  global $theme;
-  $fn = ENANO_ROOT . '/themes/' . $template->theme . '/theme.cfg';
-  require( $fn );
-  if ( isset($theme['snapr_gallery_rows']) )
-  {
-    $rows_in_browser = intval($theme['snapr_gallery_rows']);
-    if ( empty($rows_in_browser) )
-    {
-      $rows_in_browser = 5;
-    }
-  }
-  else
-  {
-    $rows_in_browser = 5;
-  }
-  
   $where = 'WHERE folder_parent IS NULL ' . "\n  ORDER BY is_folder DESC, $sort_column $sort_order, img_title ASC";
   $parms = $paths->getAllParams();
   
-  $sql = "SELECT img_id, img_title, is_folder FROM ".table_prefix."gallery $where;";
+  $sql = "SELECT img_id, img_title, is_folder, 'NULL' AS folder_id FROM ".table_prefix."gallery $where;";
   
   // Breadcrumb browser
   $breadcrumbs = array();
@@ -330,6 +314,7 @@ function page_Special_Gallery()
   {
     if ( !isset($first_row['folder_id']) )
     {
+      //die('FALLING<pre>' . print_r($first_row, true) . '</pre>');
       $first_row['folder_id'] =& $first_row['img_id'];
     }
     if ( !isset($first_row['folder_id']) )

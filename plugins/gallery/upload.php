@@ -833,10 +833,13 @@ function page_Special_GalleryUpload()
             
             // Create thumbnail image
             $thumb_filename = ENANO_ROOT . '/cache/' . $stored_name . '-thumb.jpg';
-            if ( !unlink($thumb_filename) )
+            if ( file_exists($thumb_filename) )
             {
-              $errors[] = "Could not delete $thumb_filename";
-              break 2;
+              if ( !unlink($thumb_filename) )
+              {
+                $errors[] = "Could not delete $thumb_filename";
+                break 2;
+              }
             }
             
             if ( !scale_image($store, $thumb_filename, 80, 80) )
@@ -847,10 +850,13 @@ function page_Special_GalleryUpload()
             
             // Create preview image
             $preview_filename = ENANO_ROOT . '/cache/' . $stored_name . '-preview.jpg';
-            if ( !unlink($preview_filename) )
+            if ( file_exists($preview_filename) )
             {
-              $errors[] = "Could not delete $preview_filename";
-              break 2;
+              if ( !unlink($preview_filename) )
+              {
+                $errors[] = "Could not delete $preview_filename";
+                break 2;
+              }
             }
             
             if ( !scale_image($store, $preview_filename, 640, 640) )
