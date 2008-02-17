@@ -289,7 +289,8 @@ function gallery_namespace_handler(&$page)
   $img_url  = makeUrlNS('Special', 'GalleryFetcher/preview/' . $img_id);
   $img_href = makeUrlNS('Special', 'GalleryFetcher/full/' . $img_id);
   
-  echo '<div snapr:imgid="' . $img_id . '" style="width: 1px;"><img alt="Image preview (640px max width)" src="' . $img_url . '" id="snapr_preview_img" style="border-width: 0; margin-bottom: 5px; display: block;" /></div>';
+  $iehack = ( strstr(@$_SERVER['HTTP_USER_AGENT'], 'MSIE') ) ? ' style="width: 1px;"' : '';
+  echo '<div snapr:imgid="' . $img_id . '"' . $iehack . '><img alt="Image preview (640px max width)" src="' . $img_url . '" id="snapr_preview_img" style="border-width: 0; margin-bottom: 5px; display: block;" /></div>';
   
   echo '<table border="0" width="100%"><tr><td style="text-align: left; width: 24px;">';
   
