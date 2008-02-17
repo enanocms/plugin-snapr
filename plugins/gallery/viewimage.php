@@ -241,11 +241,13 @@ function gallery_namespace_handler(&$page)
         foreach ( $response as $key => $_ )
         {
           unset($_);
-          $tag =& $response[$key];
+          $tag = $response[$key];
+          unset($response[$key]);
           $tag['note_id'] = $key;
           $tag['mode'] = 'add';
           $tag['initial_hide'] = true;
           $tag['auth_delete'] = $perms->get_permissions('snapr_add_tag');
+          $response[intval($key)] = $tag;
         }
         unset($tag);
         break;
