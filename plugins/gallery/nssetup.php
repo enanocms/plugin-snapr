@@ -21,6 +21,7 @@ function gallery_setup_namespace(&$paths)
   $paths->create_namespace('Gallery', 'Image:');
   
   $session->register_acl_type('gal_full_res', AUTH_ALLOW, 'View image at full resolution', array('read'), 'Gallery');
+  $session->register_acl_type('snapr_add_tag', AUTH_DISALLOW, 'Add image tags (separate from adding normal tags)', array('read'), 'Gallery');
   
   $session->acl_extend_scope('read',                   'Gallery', $paths);
   $session->acl_extend_scope('post_comments',          'Gallery', $paths);

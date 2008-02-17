@@ -10,7 +10,7 @@ Author URI: http://enanocms.org/
 
 global $db, $session, $paths, $template, $plugins; // Common objects
 
-define('GALLERY_VERSION', '0.1b1');
+define('GALLERY_VERSION', '0.1b2');
 
 $magick_path = getConfig('imagemagick_path');
 if ( !file_exists($magick_path) || !is_executable($magick_path) )
@@ -32,6 +32,7 @@ if ( !getConfig('gallery_version') )
                         img_filename varchar(255) NOT NULL,
                         img_time_upload int(12) NOT NULL DEFAULT 0,
                         img_time_mod int(12) NOT NULL DEFAULT 0,
+                        img_tags longtext DEFAULT NULL,
                         PRIMARY KEY ( img_id )
                       );');
   
@@ -49,6 +50,13 @@ if ( !getConfig('gallery_version') )
     $db->_die();
   
   setConfig('gallery_version', GALLERY_VERSION);
+}
+if ( getConfig('gallery_version') == '0.1b1' )
+{
+  $q = $db->sql_query('ALTER TABLE ' . table_prefix . 'gallery ADD COLUMN img_tags longtext DEFAULT NULL');
+  if ( !$q )
+    $db->_die();
+  setConfig('gallery_version', '0.1b2');
 }
 
 require( ENANO_ROOT . '/plugins/gallery/functions.php' );
