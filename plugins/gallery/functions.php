@@ -314,4 +314,66 @@ function gal_dir_recurse($dir, &$dirlist)
   return $entries;
 }
 
+/**
+ * Wrapper for JSON decoding that works on Enano 1.0.x and 1.1.x
+ * @param string JSON datastream...
+ * @return mixed
+ */
+
+function snapr_json_decode($data)
+{
+  if ( defined('ENANO_ATLEAST_1_1') )
+  {
+    try
+    {
+      $decoded = enano_json_decode($data);
+    }
+    catch ( Exception $e )
+    {
+      $response = array(
+        'mode' => 'error',
+        'error' => 'Exception in JSON parser.'
+      );
+      die(enano_json_encode($response));
+    }
+  }
+  else
+  {
+    $json = new Services_JSON(SERVICES_JSON_LOOSE_TYPE);
+    $decoded = $json->decode($data);
+  }
+  return ( isset($decoded) ) ? $decoded : false;
+}
+
+/**
+ * Wrapper for JSON encoding that works on Enano 1.0.x and 1.1.x
+ * @param mixed Data to encode
+ * @return string
+ */
+
+function snapr_json_encode($data)
+{
+  if ( defined('ENANO_ATLEAST_1_1') )
+  {
+    try
+    {
+      $encoded = enano_json_encode($data);
+    }
+    catch ( Exception $e )
+    {
+      $response = array(
+        'mode' => 'error',
+        'error' => 'Exception in JSON encoder.'
+      );
+      die(enano_json_encode($response));
+    }
+  }
+  else
+  {
+    $json = new Services_JSON(SERVICES_JSON_LOOSE_TYPE);
+    $encoded = $json->encode($data);
+  }
+  return ( isset($encoded) ) ? $encoded : false;
+}
+
 ?>

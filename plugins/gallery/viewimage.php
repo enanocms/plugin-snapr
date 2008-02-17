@@ -36,7 +36,7 @@ function gallery_namespace_handler(&$page)
     $img_id = intval($page->page_id);
     if ( !$img_id )
       return false;
-    $q = $db->sql_query('SELECT img_id, img_title, img_desc, print_sizes, img_time_upload, img_time_mod, img_filename, folder_parent FROM '.table_prefix.'gallery WHERE img_id=' . $img_id . ';');
+    $q = $db->sql_query('SELECT img_id, img_title, img_desc, print_sizes, img_time_upload, img_time_mod, img_filename, folder_parent, img_tags FROM '.table_prefix.'gallery WHERE img_id=' . $img_id . ';');
     if ( !$q )
       $db->_die();
   }
@@ -61,7 +61,7 @@ function gallery_namespace_handler(&$page)
     
     $folders = array_reverse($folders);
     // This is one of the best MySQL tricks on the market. We're going to reverse-travel a folder path using LEFT JOIN and the incredible power of metacoded SQL
-    $sql = 'SELECT g0.img_id, g0.img_title, g0.img_desc, g0.print_sizes, g0.img_time_upload, g0.img_time_mod, g0.img_filename, g0.folder_parent FROM '.table_prefix.'gallery AS g0';
+    $sql = 'SELECT g0.img_id, g0.img_title, g0.img_desc, g0.print_sizes, g0.img_time_upload, g0.img_time_mod, g0.img_filename, g0.folder_parent, g0.img_tags FROM '.table_prefix.'gallery AS g0';
     $where = "\n  " . 'WHERE g0.img_title=\'' . $db->escape($folders[0]) . '\'';
     foreach ( $folders as $i => $folder )
     {
@@ -166,10 +166,101 @@ function gallery_namespace_handler(&$page)
   
   $db->free_result();
   
+  $perms = $session->fetch_page_acl(strval($img_id), 'Gallery');
+  
+  if ( isset($_POST['ajax']) && @$_POST['ajax'] === 'true' && isset($_POST['act']) )
+  {
+    $mode =& $_POST['act'];
+    $response = array();
+    switch($mode)
+    {
+      case 'add_tag':
+        if ( !$perms->get_permissions('snapr_add_tag') )
+        {
+          die(snapr_json_encode(array(
+              'mode' => 'error',
+              'error' => 'You don\'t have permission to add tags.'
+            )));
+        }
+        if ( empty($row['img_tags']) )
+        {
+          $row['img_tags'] = '[]';
+        }
+        $row['img_tags'] = snapr_json_decode($row['img_tags']);
+        
+        $canvas_data = snapr_json_decode($_POST['canvas_params']);
+        $tag_data = array(
+            'tag' => sanitize_html($_POST['tag']),
+            'canvas_data' => $canvas_data
+          );
+        $row['img_tags'][] = $tag_data;
+        $tag_data['note_id'] = count($row['img_tags']) - 1;
+        $tag_data['mode'] = 'add';
+        $tag_data['initial_hide'] = false;
+        $tag_data['auth_delete'] = true;
+        
+        $row['img_tags'] = snapr_json_encode($row['img_tags']);
+        $row['img_tags'] = $db->escape($row['img_tags']);
+        $q = $db->sql_query('UPDATE ' . table_prefix . "gallery SET img_tags = '{$row['img_tags']}' WHERE img_id = $img_id;");
+        if ( !$q )
+          $db->die_json();
+        
+        $response[] = $tag_data;
+        break;
+      case 'del_tag':
+        if ( !$perms->get_permissions('snapr_add_tag') )
+        {
+          die(snapr_json_encode(array(
+              'mode' => 'error',
+              'error' => 'You don\'t have permission to add tags.'
+            )));
+        }
+        if ( empty($row['img_tags']) )
+        {
+          $row['img_tags'] = '[]';
+        }
+        $row['img_tags'] = snapr_json_decode($row['img_tags']);
+        
+        $tag_id = intval(@$_POST['tag_id']);
+        if ( isset($row['img_tags'][$tag_id]) )
+          unset($row['img_tags'][$tag_id]);
+        
+        $row['img_tags'] = snapr_json_encode($row['img_tags']);
+        $row['img_tags'] = $db->escape($row['img_tags']);
+        $q = $db->sql_query('UPDATE ' . table_prefix . "gallery SET img_tags = '{$row['img_tags']}' WHERE img_id = $img_id;");
+        if ( !$q )
+          $db->die_json();
+        
+        $response[] = array(
+            'mode' => 'remove',
+            'note_id' => $tag_id
+          );
+        break;
+      case 'get_tags':
+        $response = snapr_json_decode($row['img_tags']);
+        foreach ( $response as $key => $_ )
+        {
+          unset($_);
+          $tag =& $response[$key];
+          $tag['note_id'] = $key;
+          $tag['mode'] = 'add';
+          $tag['initial_hide'] = true;
+          $tag['auth_delete'] = $perms->get_permissions('snapr_add_tag');
+        }
+        unset($tag);
+        break;
+    }
+    echo snapr_json_encode($response);
+    return true;
+  }
+  
+  $have_notes = ( empty($row['img_tags']) ) ? false : ( count(snapr_json_decode($row['img_tags'])) > 0 );
+  
+  $template->add_header('<script type="text/javascript" src="' . scriptPath . '/plugins/gallery/canvas.js"></script>');
+  $template->add_header('<script type="text/javascript" src="' . scriptPath . '/plugins/gallery/tagging.js"></script>');
+  
   $template->tpl_strings['PAGE_NAME'] = 'Gallery image: ' . htmlspecialchars($row['img_title']);
   $title_spacey = strtolower(htmlspecialchars($row['img_title']));
-  
-  $perms = $session->fetch_page_acl(strval($img_id), 'Gallery');
   
   $template->header();
   
@@ -198,17 +289,7 @@ function gallery_namespace_handler(&$page)
   $img_url  = makeUrlNS('Special', 'GalleryFetcher/preview/' . $img_id);
   $img_href = makeUrlNS('Special', 'GalleryFetcher/full/' . $img_id);
   
-  if ( $perms->get_permissions('gal_full_res') )
-  {
-    echo '<a href="' . $img_href . '" title="Click to view this image at full resolution, right click to save image" onclick="window.open(this.href, \'\', \'toolbar=no,address=no,menus=no,status=no,scrollbars=yes\'); return false;">';
-  }
-  
-  echo '<img alt="Image preview (640px max width)" src="' . $img_url . '" style="border-width: 0; margin-bottom: 5px; display: block;" />';
-  
-  if ( $perms->get_permissions('gal_full_res') )
-  {
-    echo '</a>';
-  }
+  echo '<div snapr:imgid="' . $img_id . '"><img alt="Image preview (640px max width)" src="' . $img_url . '" id="snapr_preview_img" style="border-width: 0; margin-bottom: 5px; display: block;" /></div>';
   
   echo '<table border="0" width="100%"><tr><td style="text-align: left; width: 24px;">';
   
@@ -235,12 +316,32 @@ function gallery_namespace_handler(&$page)
   
   echo '</td></tr>';
   echo '<tr><td colspan="3">' . "image $folder_this of $folder_total" . '</td></tr>';
+  if ( $perms->get_permissions('gal_full_res') || $have_notes )
+  {
+    echo '<tr><td colspan="3"><small>';
+    
+    if ( $perms->get_permissions('gal_full_res') )
+      echo "<a href=\"$img_href\" onclick=\"window.open(this.href, '', 'toolbar=no,address=no,menus=no,status=no,scrollbars=yes'); return false;\">View in original resolution</a>";
+    
+    if ( $perms->get_permissions('gal_full_res') && $have_notes )
+      echo ' :: ';
+    
+    if ( $have_notes )
+      echo 'Mouse over photo to view tags';
+    
+    echo '</small></td></tr>';
+  }
   echo '</table>';
   echo '</div>';
   
-  if ( $session->user_level >= USER_LEVEL_ADMIN )
+  if ( $session->user_level >= USER_LEVEL_ADMIN || $perms->get_permissions('snapr_add_tag') )
   {
-    echo '<div style="float: right;">[ <a href="' . makeUrlNS('Special', 'GalleryUpload', 'edit_img=' . $img_id, true) . '">edit image</a> ]</div>';
+    echo '<div style="float: right;">';
+    if ( $session->user_level >= USER_LEVEL_ADMIN )
+      echo '[ <a href="' . makeUrlNS('Special', 'GalleryUpload', 'edit_img=' . $img_id, true) . '">edit image</a> ] ';
+    if ( $perms->get_permissions('snapr_add_tag') )
+      echo '[ <a href="#" onclick="snapr_add_tag(); return false;"><img alt=" " src="' . scriptPath . '/plugins/gallery/tag-image.gif" style="border-width: 0;" /> add a tag</a> ] ';
+    echo '</div>';
   }
   
   if ( !empty($row['img_desc']) )

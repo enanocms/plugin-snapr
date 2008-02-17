@@ -46,4 +46,23 @@ a.snapr-imagelink {
   vertical-align: middle;
 }
 
+div.snapr_tag_entry {
+  border: 1px solid #202020;
+  background-color: #FFFFEB;
+  color: #101010;
+  padding: 4px;
+  -moz-border-radius: 8px;
+  text-align: left;
+}
+
+div.snapr_tag {
+  border: 1px solid #202020;
+  background-color: #EBEBFF;
+  color: #101010;
+  padding: 4px;
+  text-align: left;
+  min-width: 100px;
+  font-family: arial, helvetica, sans-serif;
+  font-size: 8pt;
+}
 
