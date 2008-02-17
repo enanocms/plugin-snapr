@@ -9,7 +9,7 @@ function snapr_add_tag()
   image.parentNode.setAttribute('canvas:oncancel', 'obj.onclick = null;');
 }
 
-function snapr_process_canvas_add(obj)
+function snapr_process_canvas_add(obj, tag_data)
 {
   obj.onclick = null;
   var abs_x = $(obj).Left() + obj.canvas.left;
@@ -28,6 +28,8 @@ function snapr_process_canvas_add(obj)
   var ta = document.createElement('textarea');
   ta.rows = '7';
   ta.cols = '30';
+  if ( typeof(tag_data) == 'string' )
+    ta.value = tag_data;
   entry_div.appendChild(ta);
   
   entry_div.appendChild(document.createElement('br'));
@@ -71,7 +73,7 @@ function snapr_finalize_canvas_add(obj, canvas_data, tag)
   parent.removeChild(obj);
   
   var canvas_json = toJSONString(canvas_data);
-  ajaxPost(makeUrlNS('Gallery', id), 'ajax=true&act=add_tag&tag=' + escape(tag) + '&canvas_params=' + escape(canvas_json), snapr_process_ajax_tag_packet);
+  ajaxPost(makeUrlNS('Gallery', id), 'ajax=true&act=add_tag&tag=' + ajaxEscape(tag) + '&canvas_params=' + ajaxEscape(canvas_json), snapr_process_ajax_tag_packet);
 }
 
 function snapr_finalize_canvas_cancel(obj)
@@ -81,10 +83,44 @@ function snapr_finalize_canvas_cancel(obj)
   parent.removeChild(obj);
 }
 
+function snapr_finalize_canvas_edit_cancel(obj)
+{
+  var old_value = obj.getElementsByTagName('textarea')[0];
+  old_value = old_value.OriginalValue;
+  var canvas = obj.parentNode;
+  var canvas_data = canvas.canvas;
+  var note_id = canvas.tag_id;
+  var auth_delete = canvas.auth_delete;
+  var parent = canvas.parentNode;
+  canvas.removeChild(obj);
+  parent.removeChild(canvas);
+  // redraw the note
+  snapr_draw_note(parent, old_value, canvas_data, note_id, false, auth_delete);
+}
+
+function snapr_finalize_canvas_edit_delete(obj)
+{
+  var old_value = obj.getElementsByTagName('textarea')[0];
+  old_value = old_value.OriginalValue;
+  var canvas = obj.parentNode;
+  var canvas_data = canvas.canvas;
+  var note_id = canvas.tag_id;
+  var auth_delete = canvas.auth_delete;
+  var parent = canvas.parentNode;
+  canvas.removeChild(obj);
+  parent.removeChild(canvas);
+  // redraw the note
+  var note = snapr_draw_note(parent, old_value, canvas_data, note_id, false, auth_delete);
+  // now nuke it
+  snapr_nuke_tag(note);
+}
+
 function snapr_draw_note(obj, tag, canvas_data, note_id, initial_hide, auth_delete)
 {
   var newbox = canvas_create_box(obj, canvas_data.left, canvas_data.top, canvas_data.width, canvas_data.height);
   newbox.tag_id = note_id;
+  newbox.canvas = canvas_data;
+  newbox.auth_delete = auth_delete;
   obj.onmouseover = function()
   {
     var boxen = this.getElementsByTagName('div');
@@ -113,6 +149,7 @@ function snapr_draw_note(obj, tag, canvas_data, note_id, initial_hide, auth_dele
   }
   if ( auth_delete )
   {
+    /*
     var p = document.createElement('p');
     p.style.cssFloat = 'right';
     p.style.styleFloat = 'right';
@@ -129,6 +166,12 @@ function snapr_draw_note(obj, tag, canvas_data, note_id, initial_hide, auth_dele
     a_del.appendChild(document.createTextNode('[X]'));
     p.appendChild(a_del);
     newbox.firstChild.appendChild(p);
+    */
+    newbox.style.cursor = 'pointer';
+    newbox.onclick = function()
+    {
+      snapr_run_tag_editor(this);
+    }
   }
   var abs_x = $(newbox).Left();
   var abs_y = $(newbox).Top() + $(newbox).Height() + 2;
@@ -139,11 +182,13 @@ function snapr_draw_note(obj, tag, canvas_data, note_id, initial_hide, auth_dele
   noteObj.style.position = 'absolute';
   noteObj.style.top = abs_y + 'px';
   noteObj.style.left = abs_x + 'px';
+  noteObj.style.zIndex = '100';
   var re = new RegExp(unescape('%0A'), 'g');
   noteObj.innerHTML = tag.replace(re, "<br />\n");
   obj.appendChild(noteObj);
   if ( initial_hide )
     newbox.style.display = 'none';
+  return newbox;
 }
 
 function snapr_display_note(note)
@@ -172,6 +217,96 @@ function snapr_nuke_tag(obj)
   ajaxPost(makeUrlNS('Gallery', id), 'ajax=true&act=del_tag&tag_id=' + obj.tag_id, snapr_process_ajax_tag_packet);
 }
 
+function snapr_run_tag_editor(obj)
+{
+  obj.onclick = null;
+  var abs_x = $(obj).Left();
+  var abs_y = $(obj).Top();
+  var height = $(obj).Height() + 2;
+  
+  var value = obj.nextSibling.innerHTML;
+  var regex = new RegExp('<br>', 'g');
+  value = value.replace(regex, '');
+  obj.parentNode.removeChild(obj.nextSibling);
+  
+  var entry_div = document.createElement('div');
+  entry_div.className = 'snapr_tag_entry';
+  entry_div.style.position = 'absolute';
+  entry_div.style.top = String(height) + 'px';
+  entry_div.style.left = '0px';
+  entry_div.style.zIndex = '100';
+  
+  entry_div.appendChild(document.createTextNode('Enter a tag:'));
+  entry_div.appendChild(document.createElement('br'));
+  
+  var ta = document.createElement('textarea');
+  ta.rows = '7';
+  ta.cols = '30';
+  ta.value = value;
+  ta.style.backgroundColor = '#FFFFFF';
+  ta.style.borderWidth = '0';
+  ta.style.color = '#000000';
+  ta.OriginalValue = value;
+  entry_div.appendChild(ta);
+  
+  entry_div.appendChild(document.createElement('br'));
+  
+  var a_add = document.createElement('a');
+  a_add.href = '#';
+  a_add.onclick = function()
+  {
+    snapr_finalize_canvas_edit(this.parentNode.parentNode, this.parentNode.getElementsByTagName('textarea')[0]['value'], this.parentNode);
+    return false;
+  }
+  a_add.appendChild(document.createTextNode('Save tag'));
+  entry_div.appendChild(a_add);
+  
+  entry_div.appendChild(document.createTextNode(' | '));
+  
+  var a_cancel = document.createElement('a');
+  a_cancel.href = '#';
+  a_cancel.onclick = function()
+  {
+    snapr_finalize_canvas_edit_cancel(this.parentNode);
+    return false;
+  }
+  a_cancel.appendChild(document.createTextNode('Cancel'));
+  entry_div.appendChild(a_cancel);
+  
+  entry_div.appendChild(document.createTextNode(' | '));
+  
+  var a_del = document.createElement('a');
+  a_del.href = '#';
+  a_del.onclick = function()
+  {
+    snapr_finalize_canvas_edit_delete(this.parentNode);
+    return false;
+  }
+  a_del.style.color = '#FF0000';
+  a_del.appendChild(document.createTextNode('Delete'));
+  entry_div.appendChild(a_del);
+  
+  obj.appendChild(entry_div);
+  ta.focus();
+}
+
+function snapr_finalize_canvas_edit(canvas, value, editor)
+{
+  var canvas_data = canvas.canvas;
+  var note_id = canvas.tag_id;
+  var parent = canvas.parentNode;
+  canvas.removeChild(editor);
+  parent.removeChild(canvas);
+  // send the edit across the 'net
+  var parent_obj = document.getElementById('snapr_preview_img').parentNode;
+  var id = parent_obj.getAttribute('snapr:imgid');
+  if ( !id )
+    return false;
+  
+  var canvas_json = toJSONString(canvas_data);
+  ajaxPost(makeUrlNS('Gallery', id), 'ajax=true&act=edit_tag&tag=' + ajaxEscape(value) + '&canvas_params=' + ajaxEscape(canvas_json) + '&tag_id=' + note_id, snapr_process_ajax_tag_packet);
+}
+
 function snapr_process_ajax_tag_packet()
 {
   if ( ajax.readyState == 4 && ajax.status == 200 )
@@ -179,7 +314,7 @@ function snapr_process_ajax_tag_packet()
     var response = String(ajax.responseText + '');
     if ( response.substr(0, 1) != '[' && response.substr(0, 1) != '{' )
     {
-      handle_invalid_json(response);
+      new messagebox(MB_OK|MB_ICONSTOP, 'JSON response invalid', 'Received unexpected response:<pre>' + response + '</pre>');
       return false;
     }
     response = parseJSON(response);

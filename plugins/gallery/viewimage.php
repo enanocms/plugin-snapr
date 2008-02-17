@@ -236,6 +236,50 @@ function gallery_namespace_handler(&$page)
             'note_id' => $tag_id
           );
         break;
+      case 'edit_tag':
+        if ( !$perms->get_permissions('snapr_add_tag') )
+        {
+          die(snapr_json_encode(array(
+              'mode' => 'error',
+              'error' => 'You don\'t have permission to edit tags.'
+            )));
+        }
+        if ( empty($row['img_tags']) )
+        {
+          $row['img_tags'] = '[]';
+        }
+        $row['img_tags'] = snapr_json_decode($row['img_tags']);
+        
+        $tag_id = intval(@$_POST['tag_id']);
+        if ( isset($row['img_tags'][$tag_id]) )
+        {
+          $row['img_tags'][$tag_id]['tag'] = sanitize_html($_POST['tag']);
+          // copy it
+          $tag_return = $row['img_tags'][$tag_id];
+          unset($tag);
+        }
+        else
+        {
+          die(snapr_json_encode(array(
+              'mode' => 'error',
+              'error' => 'That tag doesn\'t exist.'
+            )));
+        }
+        
+        $row['img_tags'] = snapr_json_encode($row['img_tags']);
+        $row['img_tags'] = $db->escape($row['img_tags']);
+        $q = $db->sql_query('UPDATE ' . table_prefix . "gallery SET img_tags = '{$row['img_tags']}' WHERE img_id = $img_id;");
+        if ( !$q )
+          $db->die_json();
+        
+        $tag_return['mode'] = 'add';
+        $tag_return['canvas_data'] = snapr_json_decode($_POST['canvas_params']);
+        $tag_return['auth_delete'] = $perms->get_permissions('snapr_add_tag');
+        $tag_return['initial_hide'] = false;
+        $tag_return['note_id'] = $tag_id;
+        $response = array($tag_return);
+        
+        break;
       case 'get_tags':
         $response = snapr_json_decode($row['img_tags']);
         foreach ( $response as $key => $_ )
@@ -243,16 +287,19 @@ function gallery_namespace_handler(&$page)
           unset($_);
           $tag = $response[$key];
           unset($response[$key]);
-          $tag['note_id'] = $key;
+          $tag['note_id'] = intval($key);
           $tag['mode'] = 'add';
           $tag['initial_hide'] = true;
           $tag['auth_delete'] = $perms->get_permissions('snapr_add_tag');
           $response[intval($key)] = $tag;
         }
+        $response = array_values($response);
         unset($tag);
         break;
     }
-    echo snapr_json_encode($response);
+    $encoded = snapr_json_encode($response);
+    header('Content-type: text/plain');
+    echo $encoded;
     return true;
   }
   
