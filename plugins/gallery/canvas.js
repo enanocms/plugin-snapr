@@ -83,8 +83,8 @@ function canvas_create_box(obj, x, y, width, height)
   div_inner.style.border = '1px solid #FFFFFF';
   if ( IE )
   {
-    div_inner.style.width = '1px';
-    div_inner.style.height = '1px';
+    div_inner.style.width = '100%';
+    div_inner.style.height = '100%';
   }
   else
   {
