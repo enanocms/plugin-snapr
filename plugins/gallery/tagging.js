@@ -361,14 +361,29 @@ function snapr_process_ajax_tag_packet()
   }
 }
 
-var snapr_tags_onload = function()
+// Don't fire the tag init until JS init *and* image are finished.
+// Thanks to pmccullough for pointing out this race condition.
+var snapr_lock_onload_js = true;
+var snapr_lock_onload_img = true;
+
+var snapr_tags_onload_real = function()
 {
+  // make sure we aren't waiting...
+  if ( snapr_lock_onload_img || snapr_lock_onload_js )
+    return false;
+  
   // add the new box
   var parent_obj = document.getElementById('snapr_preview_img').parentNode;
   var id = parent_obj.getAttribute('snapr:imgid');
   if ( !id )
     return false;
   ajaxPost(makeUrlNS('Gallery', id), 'ajax=true&act=get_tags', snapr_process_ajax_tag_packet);
+}
+
+var snapr_tags_onload = function()
+{
+  snapr_lock_onload_js = false;
+  snapr_tags_onload_real();
 }
 
 addOnloadHook(snapr_tags_onload);

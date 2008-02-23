@@ -30,6 +30,9 @@ function page_Special_GalleryFetcher()
 {
   global $db, $session, $paths, $template, $plugins; // Common objects
   
+  // artificial race condition for debug
+  // sleep(5);
+  
   $type = $paths->getParam(0);
   if ( !in_array($type, array('thumb', 'preview', 'full')) )
   {
