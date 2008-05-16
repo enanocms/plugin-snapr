@@ -92,17 +92,17 @@ function page_Special_GalleryFetcher()
       {
         die('Missing width or height.');
       }
-      $src_filename  = ENANO_ROOT . '/files/' . $row['img_filename'];
-      $dest_filename = ENANO_ROOT . '/cache/' . $row['img_filename'] . "-embed-$width-$height.$ext";
-      $filename =& $dest_filename;
-      $ext = get_file_extension($filename);
-      
       $width = intval($_GET['width']);
       $height = intval($_GET['height']);
       if ( empty($width) || empty($height) || $width > 2048 || $height > 2048 )
       {
         die('Bad width or height');
       }
+      
+      $src_filename  = ENANO_ROOT . '/files/' . $row['img_filename'];
+      $dest_filename = ENANO_ROOT . '/cache/' . $row['img_filename'] . "-embed-$width-$height.$ext";
+      $filename =& $dest_filename;
+      $ext = get_file_extension($filename);
       
       if ( !file_exists($dest_filename) )
       {
