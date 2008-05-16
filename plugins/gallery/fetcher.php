@@ -34,7 +34,7 @@ function page_Special_GalleryFetcher()
   // sleep(5);
   
   $type = $paths->getParam(0);
-  if ( !in_array($type, array('thumb', 'preview', 'full')) )
+  if ( !in_array($type, array('thumb', 'preview', 'full', 'embed')) )
   {
     die('Hack attempt');
   }
@@ -86,6 +86,32 @@ function page_Special_GalleryFetcher()
         case 'tif': case 'tiff': $mimetype = 'image/tiff'; break;
         default: $mimetype = 'application/octet-stream';
       }
+      break;
+    case 'embed':
+      if ( !isset($_GET['width']) || !isset($_GET['height']) )
+      {
+        die('Missing width or height.');
+      }
+      $src_filename  = ENANO_ROOT . '/files/' . $row['img_filename'];
+      $dest_filename = ENANO_ROOT . '/cache/' . $row['img_filename'] . "-embed-$width-$height.$ext";
+      $filename =& $dest_filename;
+      $ext = get_file_extension($filename);
+      
+      $width = intval($_GET['width']);
+      $height = intval($_GET['height']);
+      if ( empty($width) || empty($height) || $width > 2048 || $height > 2048 )
+      {
+        die('Bad width or height');
+      }
+      
+      if ( !file_exists($dest_filename) )
+      {
+        if ( !scale_image($src_filename, $dest_filename, $width, $height, false) )
+        {
+          die('Image scaling process failed.');
+        }
+      }
+      
       break;
     default:
       die('PHP...insane...');

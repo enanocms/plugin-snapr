@@ -4,7 +4,7 @@ Plugin Name: Snapr
 Plugin URI: http://enanocms.org/Enano.Img_Gallery
 Description: Provides an intuitive image gallery system with a browser, viewer for individual images, upload interface, and comment system integration.
 Author: Dan Fuhry
-Version: 0.1 beta 1
+Version: 0.1 beta 2
 Author URI: http://enanocms.org/
 */
 
@@ -67,5 +67,6 @@ require( ENANO_ROOT . '/plugins/gallery/upload.php' );
 require( ENANO_ROOT . '/plugins/gallery/fetcher.php' );
 require( ENANO_ROOT . '/plugins/gallery/search.php' );
 require( ENANO_ROOT . '/plugins/gallery/sidebar.php' );
+require( ENANO_ROOT . '/plugins/gallery/imagetag.php' );
 
 ?>
