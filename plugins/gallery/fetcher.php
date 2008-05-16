@@ -99,10 +99,11 @@ function page_Special_GalleryFetcher()
         die('Bad width or height');
       }
       
+      $ext = get_file_extension($row['img_filename']);
+      
       $src_filename  = ENANO_ROOT . '/files/' . $row['img_filename'];
       $dest_filename = ENANO_ROOT . '/cache/' . $row['img_filename'] . "-embed-$width-$height.$ext";
       $filename =& $dest_filename;
-      $ext = get_file_extension($filename);
       
       if ( !file_exists($dest_filename) )
       {
