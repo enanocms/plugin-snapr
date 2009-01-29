@@ -16,7 +16,7 @@
 // Search results hook
 //
 
-$plugins->attachHook('search_results', 'gal_searcher($q, $offset);');
+$plugins->attachHook('search_results', 'if ( !isset($offset) ) $offset =& $start; gal_searcher($q, $offset);');
 $plugins->attachHook('search_global_inner', 'snapr_search_new_api($query, $query_phrase, $scores, $page_data, $case_sensitive, $word_list);');
 
 $plugins->attachHook('compile_template', '
