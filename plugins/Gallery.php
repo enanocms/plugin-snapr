@@ -1,10 +1,10 @@
 <?php
 /*
 Plugin Name: Snapr
-Plugin URI: http://enanocms.org/Enano.Img_Gallery
+Plugin URI: http://enanocms.org/plugin/snapr
 Description: Provides an intuitive image gallery system with a browser, viewer for individual images, upload interface, and comment system integration.
 Author: Dan Fuhry
-Version: 0.1 beta 2
+Version: 0.1 beta 3
 Author URI: http://enanocms.org/
 */
 
@@ -12,12 +12,27 @@ global $db, $session, $paths, $template, $plugins; // Common objects
 
 define('GALLERY_VERSION', '0.1b2');
 
+if ( !defined('ENANO_ATLEAST_1_1') )
+{
+  $fn = basename(__FILE__);
+  setConfig("plugin_$fn", '0');
+  die_semicritical('Snapr can\'t load on this site', '<p>This version of Snapr requires Enano 1.1.6 or later.</p>');
+}
+
 $magick_path = getConfig('imagemagick_path');
 if ( !file_exists($magick_path) || !is_executable($magick_path) )
 {
   $fn = basename(__FILE__);
   setConfig("plugin_$fn", '0');
-  die('Snapr: You must have ImageMagick installed and working to use this plugin. The plugin has been disabled, please setup ImageMagick and then re-enable it.');
+  // set disabled flag with new plugin system
+  if ( defined('ENANO_ATLEAST_1_1') && defined('PLUGIN_DISABLED') )
+  {
+    $q = $db->sql_query('UPDATE ' . table_prefix . "plugins SET plugin_flags = plugin_flags | " . PLUGIN_DISABLED . " WHERE plugin_filename = 'Gallery.php';");
+    if ( !$q )
+      $db->_die();
+  }
+  
+  die_semicritical('Snapr can\'t load on this site', '<p>You must have ImageMagick installed and working to use this plugin. The plugin has been disabled, please setup ImageMagick and then re-enable it.</p>');
 }
 
 if ( !getConfig('gallery_version') )
@@ -32,7 +47,7 @@ if ( !getConfig('gallery_version') )
                         img_filename varchar(255) NOT NULL,
                         img_time_upload int(12) NOT NULL DEFAULT 0,
                         img_time_mod int(12) NOT NULL DEFAULT 0,
-                        img_tags longtext DEFAULT NULL,
+                        img_tags longtext,
                         PRIMARY KEY ( img_id )
                       );');
   
@@ -44,7 +59,7 @@ if ( !getConfig('gallery_version') )
   if ( !$q )
     $db->_die();
   
-  $q = $db->sql_query('INSERT INTO '.table_prefix.'gallery(img_title,img_desc,img_filename,img_time_upload,img_time_mod) VALUES(\'Welcome to Snapr!\', \'You\'\'re past the hard part - Snapr is set up and working on your server. What you\'\'re looking at now is what most users will see when they look at an image in your gallery. The next step is to [[Special:GalleryUpload|upload some images]]. After that, make your gallery publicly accessible by adding a link to the [[Special:Gallery|browser]], if you haven\'\'t already done so. See the README file included with Snapr for more information.\', \'snapr-logo.png\', UNIX_TIMESTAMP(), UNIX_TIMESTAMP());');
+  $q = $db->sql_query('INSERT INTO '.table_prefix.'gallery(img_title,img_desc,img_filename,img_time_upload,img_time_mod,img_tags) VALUES(\'Welcome to Snapr!\', \'You\'\'re past the hard part - Snapr is set up and working on your server. What you\'\'re looking at now is what most users will see when they look at an image in your gallery. The next step is to [[Special:GalleryUpload|upload some images]]. After that, make your gallery publicly accessible by adding a link to the [[Special:Gallery|browser]], if you haven\'\'t already done so. See the README file included with Snapr for more information.\', \'snapr-logo.png\', UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), \'[]\');');
   
   if ( !$q )
     $db->_die();
@@ -53,7 +68,7 @@ if ( !getConfig('gallery_version') )
 }
 if ( getConfig('gallery_version') == '0.1b1' )
 {
-  $q = $db->sql_query('ALTER TABLE ' . table_prefix . 'gallery ADD COLUMN img_tags longtext DEFAULT NULL');
+  $q = $db->sql_query('ALTER TABLE ' . table_prefix . 'gallery ADD COLUMN img_tags longtext;');
   if ( !$q )
     $db->_die();
   setConfig('gallery_version', '0.1b2');
