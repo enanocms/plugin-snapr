@@ -819,8 +819,8 @@ function page_Special_GalleryUpload()
             $local_d = $desc->run();
             $local_d = RenderMan::preprocess_text($local_d, true, false);
             
-            $subq = '(\'' . $stored_name . '\', \'' . $db->escape($local_t) . '\', \'' . $db->escape($local_d) . '\',\'a:0:{}\', UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), ' . $folder . ')';
-            $sql = "INSERT INTO ".table_prefix."gallery(img_filename,img_title,img_desc,print_sizes,img_time_upload,img_time_mod,folder_parent) VALUES{$subq};";
+            $subq = '(\'' . $stored_name . '\', \'' . $db->escape($local_t) . '\', \'' . $db->escape($local_d) . '\',\'a:0:{}\', UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), ' . $folder . ', \'[]\')';
+            $sql = "INSERT INTO ".table_prefix."gallery(img_filename,img_title,img_desc,print_sizes,img_time_upload,img_time_mod,folder_parent,img_tags) VALUES{$subq};";
             
             if ( !$db->sql_query($sql) )
               $db->_die();
@@ -907,8 +907,8 @@ function page_Special_GalleryUpload()
         $local_d = $desc->run();
         $local_d = RenderMan::preprocess_text($local_d, true, false);
         
-        $subq = '(\'' . $file['stored_name'] . '\', \'' . $db->escape($local_t) . '\', \'' . $db->escape($local_d) . '\',\'a:0:{}\', UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), ' . $folder . ')';
-        $sql = "INSERT INTO ".table_prefix."gallery(img_filename,img_title,img_desc,print_sizes,img_time_upload,img_time_mod,folder_parent) VALUES{$subq};";
+        $subq = '(\'' . $file['stored_name'] . '\', \'' . $db->escape($local_t) . '\', \'' . $db->escape($local_d) . '\',\'a:0:{}\', UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), ' . $folder . ', \'[]\')';
+        $sql = "INSERT INTO ".table_prefix."gallery(img_filename,img_title,img_desc,print_sizes,img_time_upload,img_time_mod,folder_parent,img_tags) VALUES{$subq};";
         
         if ( !$db->sql_query($sql) )
           $db->_die();
@@ -987,7 +987,7 @@ function page_Special_GalleryUpload()
   </script>
   <?php
   
-  echo '<form action="' . makeUrlNS('Special', 'GalleryUpload') . '" enctype="multipart/form-data" method="post">';
+  echo '<form action="' . makeUrlNS('Special', 'GalleryUpload') . '" enctype="multipart/form-data" method="post" onsubmit="if ( window.whiteOutForm ) window.whiteOutForm(this);">';
   echo $max_size_field;
   if ( count($errors) > 0 )
   {
