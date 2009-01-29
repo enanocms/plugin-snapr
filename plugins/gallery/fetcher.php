@@ -136,10 +136,25 @@ function page_Special_GalleryFetcher()
     die('Can\'t retrieve image file ' . $filename);
   
   $contents = file_get_contents($filename);
+  // expire images 30 days from now
+  $expiry = time() + ( 30 * 86400 );
   
   header('Content-type: '   . $mimetype);
   header('Content-length: ' . strlen($contents));
   header('Last-Modified: '  . date('r', $row['img_time_mod']));
+  header('Expires: ' . date('r', $expiry));
+  
+  // check for not-modified condition
+  if ( isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) )
+  {
+    $time = @strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']);
+    if ( ( !empty($time) && intval($row['img_time_mod']) <= $time ) || date('r', $row['img_time_mod']) === $_SERVER['HTTP_IF_MODIFIED_SINCE'] )
+    {
+      header('HTTP/1.1 304 Not Modified');
+      $db->close();
+      exit;
+    }
+  }
   
   if ( isset($_GET['download']) )
   {
