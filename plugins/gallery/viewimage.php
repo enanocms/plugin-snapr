@@ -17,6 +17,7 @@
 ##
 
 $plugins->attachHook('page_not_found', 'gallery_namespace_handler($this);');
+$plugins->attachHook('page_type_string_set', 'if ( $local_namespace == "Gallery" ) $this->namespace_string = \'image\';');
 
 function gallery_namespace_handler(&$page)
 {
@@ -31,78 +32,7 @@ function gallery_namespace_handler(&$page)
     return true;
   }
   
-  if ( preg_match('/^[0-9]+$/', $page->page_id) )
-  {
-    $img_id = intval($page->page_id);
-    if ( !$img_id )
-      return false;
-    $q = $db->sql_query('SELECT img_id, img_title, img_desc, print_sizes, img_time_upload, img_time_mod, img_filename, folder_parent, img_tags FROM '.table_prefix.'gallery WHERE img_id=' . $img_id . ';');
-    if ( !$q )
-      $db->_die();
-  }
-  else
-  {
-    // Ech... he sent us a string... parse it and see what we get
-    if ( strstr($page->page_id, '/') )
-    {
-      $folders = explode('/', $page->page_id);
-    }
-    else
-    {
-      $folders = array($page->page_id);
-    }
-    foreach ( $folders as $i => $_crap )
-    {
-      $folder =& $folders[$i];
-      $folder = dirtify_page_id($folder);
-      $folder = str_replace('_', ' ', $folder);
-    }
-    unset($folder);
-    
-    $folders = array_reverse($folders);
-    // This is one of the best MySQL tricks on the market. We're going to reverse-travel a folder path using LEFT JOIN and the incredible power of metacoded SQL
-    $sql = 'SELECT g0.img_id, g0.img_title, g0.img_desc, g0.print_sizes, g0.img_time_upload, g0.img_time_mod, g0.img_filename, g0.folder_parent, g0.img_tags FROM '.table_prefix.'gallery AS g0';
-    $where = "\n  " . 'WHERE g0.img_title=\'' . $db->escape($folders[0]) . '\'';
-    foreach ( $folders as $i => $folder )
-    {
-      if ( $i == 0 )
-        continue;
-      $i_dec = $i - 1;
-      $folder = $db->escape($folder);
-      $sql .= "\n  LEFT JOIN ".table_prefix."gallery AS g{$i}\n    ON ( g{$i}.img_id=g{$i_dec}.folder_parent AND g{$i}.img_title='$folder' )";
-      $where .= "\n    ".'AND g'.$i.'.img_id IS NOT NULL';
-    }
-    $where .= "\n    AND g{$i}.folder_parent IS NULL";
-    $sql .= $where . ';';
-    
-    if ( !$db->sql_query($sql) )
-    {
-      $db->_die('The image metadata could not be loaded.');
-    }
-    
-    // Now that the folder data is no longer needed, we can fool around with it a little
-    $folders = $page->page_id;
-    if ( !strstr($folders, '/') )
-    {
-      $hier = '/';
-    }
-    else
-    {
-      $hier = preg_replace('/\/([^\/]+)$/', '/', $folders);
-      $hier = sanitize_page_id($hier);
-    }
-    
-  }
-  if ( $db->numrows() < 1 )
-  {
-    // Image not found - show custom error message
-    $template->header();
-    echo '<h3>There is no image in the gallery with this ID.</h3>';
-    echo '<p>You have requested an image that couldn\'t be looked up. Please check the URL and try again, or visit the <a href="' . makeUrlNS('Special', 'Gallery') . '">Gallery index</a>.</p>';
-    $template->footer();
-    return false;
-  }
-  $row = $db->fetchrow();
+  $row =& $page->image_info;
   
   $db->free_result();
   
@@ -313,6 +243,17 @@ function gallery_namespace_handler(&$page)
   $template->add_header('<script type="text/javascript" src="' . scriptPath . '/plugins/gallery/tagging.js"></script>');
   
   $template->tpl_strings['PAGE_NAME'] = 'Gallery image: ' . htmlspecialchars($row['img_title']);
+  if ( is_object(@$GLOBALS['output']) )
+  {
+    global $output;
+    $output->set_title('Gallery image: ' . $row['img_title']);
+  }
+  else if ( method_exists($template, 'assign_vars') )
+  {
+    $template->assign_vars(array(
+        'PAGE_NAME' => 'Gallery image: ' . htmlspecialchars($row['img_title'])
+      ));
+  }
   $title_spacey = strtolower(htmlspecialchars($row['img_title']));
   
   $template->header();
@@ -425,7 +366,131 @@ function gallery_namespace_handler(&$page)
   echo '</table></div>';
   
   $template->footer();
+}
+
+/**
+ * This is for Enano 1.1.6 and up.
+ */
+
+class Namespace_Gallery extends Namespace_Default
+{
+  public $image_info;
+  
+  function __construct($page_id, $namespace, $revision_id = 0)
+  {
+    global $db, $session, $paths, $template, $plugins; // Common objects
+      
+    $this->page_id = sanitize_page_id($page_id);
+    $this->namespace = $namespace;
+    $this->revision_id = intval($revision_id);
     
+    // only do this if calling from the (very heavily feature filled) abstract
+    // this will still be called if you're using your own handler but not replacing the constructor
+    if ( __CLASS__ == 'Namespace_Gallery' )
+    {
+      $this->exists = false;
+      // NOTE! These should already be WELL sanitized before we reach this stage.
+      
+      if ( preg_match('/^[0-9]+$/', $this->page_id) )
+      {
+        $img_id = intval($this->page_id);
+        if ( !$img_id )
+        {
+          $this->exists = false;
+          return;
+        }
+        $q = $db->sql_query('SELECT img_id, img_title, img_desc, print_sizes, img_time_upload, img_time_mod, img_filename, folder_parent, img_tags FROM '.table_prefix.'gallery WHERE img_id=' . $img_id . ';');
+        if ( !$q )
+          $db->_die();
+      }
+      else
+      {
+        // Ech... he sent us a string... parse it and see what we get
+        if ( strstr($this->page_id, '/') )
+        {
+          $folders = explode('/', $this->page_id);
+        }
+        else
+        {
+          $folders = array($this->page_id);
+        }
+        foreach ( $folders as $i => $_crap )
+        {
+          $folder =& $folders[$i];
+          $folder = dirtify_page_id($folder);
+          $folder = str_replace('_', ' ', $folder);
+        }
+        unset($folder);
+        
+        $folders = array_reverse($folders);
+        // This is one of the best MySQL tricks on the market. We're going to reverse-travel a folder path using LEFT JOIN and the incredible power of metacoded SQL
+        $sql = 'SELECT g0.img_id, g0.img_title, g0.img_desc, g0.print_sizes, g0.img_time_upload, g0.img_time_mod, g0.img_filename, g0.folder_parent, g0.img_tags FROM '.table_prefix.'gallery AS g0';
+        $where = "\n  " . 'WHERE g0.img_title=\'' . $db->escape($folders[0]) . '\'';
+        foreach ( $folders as $i => $folder )
+        {
+          if ( $i == 0 )
+            continue;
+          $i_dec = $i - 1;
+          $folder = $db->escape($folder);
+          $sql .= "\n  LEFT JOIN ".table_prefix."gallery AS g{$i}\n    ON ( g{$i}.img_id=g{$i_dec}.folder_parent AND g{$i}.img_title='$folder' )";
+          $where .= "\n    ".'AND g'.$i.'.img_id IS NOT NULL';
+        }
+        $where .= "\n    AND g{$i}.folder_parent IS NULL";
+        $sql .= $where . ';';
+        
+        if ( !$db->sql_query($sql) )
+        {
+          $db->_die('The image metadata could not be loaded.');
+        }
+        
+        // Now that the folder data is no longer needed, we can fool around with it a little
+        $folders = $this->page_id;
+        if ( !strstr($folders, '/') )
+        {
+          $hier = '/';
+        }
+        else
+        {
+          $hier = preg_replace('/\/([^\/]+)$/', '/', $folders);
+          $hier = sanitize_page_id($hier);
+        }
+        
+      }
+      if ( $db->numrows() < 1 )
+      {
+        // Image not found
+        $this->exists = false;
+      }
+      else
+      {
+        $this->image_info = $db->fetchrow();
+        $this->exists = true;
+      }
+      
+      $db->free_result();
+    }
+  }
+  
+  function send()
+  {
+    if ( $this->exists )
+    {
+      gallery_namespace_handler($this);
+    }
+    else
+    {
+      global $output;
+      $output->header();
+      $this->error_404();
+      $output->footer();
+    }
+  }
+  
+  function error_404()
+  {
+    echo '<h3>There is no image in the gallery with this ID.</h3>';
+    echo '<p>You have requested an image that couldn\'t be looked up. Please check the URL and try again, or visit the <a href="' . makeUrlNS('Special', 'Gallery') . '">Gallery index</a>.</p>';
+  }
 }
 
 ?>
