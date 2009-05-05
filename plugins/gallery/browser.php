@@ -441,7 +441,7 @@ function page_Special_Gallery()
     'img_id' => array($renderer, 'render')
     );
   
-  $renderer->icons_per_row = $rows_in_browser;
+  $renderer->icons_per_row = 5;
   
   $start = 0;
   if ( isset($_GET['start']) && preg_match('/^[0-9]+$/', $_GET['start']) )

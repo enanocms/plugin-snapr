@@ -460,12 +460,42 @@ class Namespace_Gallery extends Namespace_Default
       {
         // Image not found
         $this->exists = false;
+        $this->cdata = array(
+            'urlname' => $this->page_id,
+            'namespace' => $this->namespace,
+            'name' => 'Image not found',
+            'special' => 0,
+            'visible' => 0,
+            'comments_on' => 0,
+            'protected' => 0,
+            'delvotes' => 0,
+            'delvote_ips' => '',
+            'wiki_mode' => 0,
+            'page_exists' => false,
+            'page_format' => getConfig('default_page_format', 'wikitext')
+          );
       }
       else
       {
         $this->image_info = $db->fetchrow();
         $this->exists = true;
+        $this->cdata = array(
+            'urlname' => $this->page_id,
+            'namespace' => $this->namespace,
+            'name' => $this->image_info['img_title'],
+            'special' => 1,
+            'visible' => 1,
+            'comments_on' => 1,
+            'protected' => 0,
+            'delvotes' => 0,
+            'delvote_ips' => '',
+            'wiki_mode' => 0,
+            'page_exists' => true,
+            'page_format' => getConfig('default_page_format', 'wikitext')
+          );
       }
+      $this->title =& $this->cdata['name'];
+      $this->cdata = Namespace_Default::bake_cdata($this->cdata);
       
       $db->free_result();
     }

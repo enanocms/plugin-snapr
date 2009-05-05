@@ -12,7 +12,7 @@ div.gallery_icon {
   margin: 0 auto;
   padding: 4px;
   width: 80px;
-  white-space: nowrap;
+  /* white-space: nowrap; */
 }
 
 div.gallery_icon:hover {
@@ -36,8 +36,10 @@ ul.snapr-gallery li.snapr-icon {
   float: left;
   list-style-type: none !important;
   list-style-image: none !important;
+  background-image: none !important;
   width: 80px;
   margin-right: 15px;
+  display: block;
 }
 
 a.snapr-imagelink {
@@ -62,6 +64,7 @@ div.snapr_tag {
   padding: 4px;
   text-align: left;
   min-width: 100px;
+  max-width: 250px;
   font-family: arial, helvetica, sans-serif;
   font-size: 8pt;
 }
