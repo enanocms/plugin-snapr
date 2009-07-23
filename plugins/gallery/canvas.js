@@ -4,8 +4,8 @@ var CANVAS_KEY_ESC = 27;
 
 function canvas_click(obj)
 {
-  var click_x = mouseX - $(obj).Left();
-  var click_y = mouseY - $(obj).Top() + getScrollOffset();
+  var click_x = mouseX - $dynano(obj).Left();
+  var click_y = mouseY - $dynano(obj).Top() + getScrollOffset();
   
   if ( obj.canvas_in_draw )
   {
@@ -63,8 +63,8 @@ function canvas_create_box(obj, x, y, width, height)
 {
   var inner_width = width - 2;
   var inner_height = height - 2;
-  var top = $(obj).Top() + y;
-  var left = $(obj).Left() + x;
+  var top = $dynano(obj).Top() + y;
+  var left = $dynano(obj).Left() + x;
   
   // draw outer box
   var div_outer = document.createElement('div');
@@ -102,17 +102,17 @@ function canvas_redraw_box(obj)
 {
   if ( !obj.canvas_box_obj )
     return false;
-  var rel_x = mouseX - $(obj).Left();
-  var rel_y = mouseY - $(obj).Top() + getScrollOffset();
+  var rel_x = mouseX - $dynano(obj).Left();
+  var rel_y = mouseY - $dynano(obj).Top() + getScrollOffset();
   var new_width = rel_x - obj.canvas_box_obj.rootX;
   var new_height = rel_y - obj.canvas_box_obj.rootY;
   var rootX = obj.canvas_box_obj.rootX;
   var rootY = obj.canvas_box_obj.rootY;
   // Limit dimensions to width - origin_x and height - origin_y
-  if ( new_width + rootX > $(obj).Width() )
-    new_width = $(obj).Width() - rootX;
-  if ( new_height + rootY > $(obj).Height() )
-    new_height = $(obj).Height() - rootY;
+  if ( new_width + rootX > $dynano(obj).Width() )
+    new_width = $dynano(obj).Width() - rootX;
+  if ( new_height + rootY > $dynano(obj).Height() )
+    new_height = $dynano(obj).Height() - rootY;
   // If going to the top or left of the origin, avoid negative width/height by moving the box
   if ( new_width < 1 )
   {
@@ -147,10 +147,10 @@ function canvas_close_draw(obj, x, y)
   canvas_restore_mousemove();
   obj.canvas_in_draw = false;
   obj.canvas = {
-    top: $(obj.canvas_box_obj).Top() - $(obj).Top(),
-    left: $(obj.canvas_box_obj).Left() - $(obj).Left(),
-    width: $(obj.canvas_box_obj).Width(),
-    height: $(obj.canvas_box_obj).Height()
+    top: $dynano(obj.canvas_box_obj).Top() - $dynano(obj).Top(),
+    left: $dynano(obj.canvas_box_obj).Left() - $dynano(obj).Left(),
+    width: $dynano(obj.canvas_box_obj).Width(),
+    height: $dynano(obj.canvas_box_obj).Height()
   }
   obj.onclick = function(e)
   {

@@ -12,8 +12,8 @@ function snapr_add_tag()
 function snapr_process_canvas_add(obj, tag_data)
 {
   obj.onclick = null;
-  var abs_x = $(obj).Left() + obj.canvas.left;
-  var abs_y = $(obj).Top()  + obj.canvas.top;
+  var abs_x = $dynano(obj).Left() + obj.canvas.left;
+  var abs_y = $dynano(obj).Top()  + obj.canvas.top;
   var height = obj.canvas.height + 2;
   
   var entry_div = document.createElement('div');
@@ -38,7 +38,11 @@ function snapr_process_canvas_add(obj, tag_data)
   a_add.href = '#';
   a_add.onclick = function()
   {
-    snapr_finalize_canvas_add(this.parentNode, this.parentNode.parentNode.canvas, this.previousSibling.previousSibling.value);
+    var el = this.previousSibling;
+    while ( el.tagName != 'TEXTAREA' )
+      el = el.previousSibling;
+    
+    snapr_finalize_canvas_add(this.parentNode, this.parentNode.parentNode.canvas, el.value);
     return false;
   }
   a_add.appendChild(document.createTextNode('Add tag'));
@@ -173,8 +177,8 @@ function snapr_draw_note(obj, tag, canvas_data, note_id, initial_hide, auth_dele
       snapr_run_tag_editor(this);
     }
   }
-  var abs_x = $(newbox).Left();
-  var abs_y = $(newbox).Top() + $(newbox).Height() + 2;
+  var abs_x = $dynano(newbox).Left();
+  var abs_y = $dynano(newbox).Top() + $dynano(newbox).Height() + 2;
   var noteObj = document.createElement('div');
   newbox.noteObj = noteObj;
   noteObj.className = 'snapr_tag';
@@ -220,9 +224,9 @@ function snapr_nuke_tag(obj)
 function snapr_run_tag_editor(obj)
 {
   obj.onclick = null;
-  var abs_x = $(obj).Left();
-  var abs_y = $(obj).Top();
-  var height = $(obj).Height() + 2;
+  var abs_x = $dynano(obj).Left();
+  var abs_y = $dynano(obj).Top();
+  var height = $dynano(obj).Height() + 2;
   
   var value = obj.nextSibling.innerHTML;
   var regex = new RegExp('<br>', 'g');
@@ -307,7 +311,7 @@ function snapr_finalize_canvas_edit(canvas, value, editor)
   ajaxPost(makeUrlNS('Gallery', id), 'ajax=true&act=edit_tag&tag=' + ajaxEscape(value) + '&canvas_params=' + ajaxEscape(canvas_json) + '&tag_id=' + note_id, snapr_process_ajax_tag_packet);
 }
 
-function snapr_process_ajax_tag_packet()
+function snapr_process_ajax_tag_packet(ajax)
 {
   if ( ajax.readyState == 4 && ajax.status == 200 )
   {
