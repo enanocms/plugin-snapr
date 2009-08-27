@@ -23,13 +23,21 @@ $magick_path = getConfig('imagemagick_path');
 if ( !file_exists($magick_path) || !is_executable($magick_path) )
 {
   $fn = basename(__FILE__);
-  setConfig("plugin_$fn", '0');
   // set disabled flag with new plugin system
   if ( defined('ENANO_ATLEAST_1_1') && defined('PLUGIN_DISABLED') )
   {
     $q = $db->sql_query('UPDATE ' . table_prefix . "plugins SET plugin_flags = plugin_flags | " . PLUGIN_DISABLED . " WHERE plugin_filename = 'Gallery.php';");
     if ( !$q )
       $db->_die();
+	  
+    // kill off cache
+    global $cache;
+    $cache->purge('plugins');
+  }
+  else
+  {
+    // old plugin system
+    setConfig("plugin_$fn", '0');
   }
   
   die_semicritical('Snapr can\'t load on this site', '<p>You must have ImageMagick installed and working to use this plugin. The plugin has been disabled, please setup ImageMagick and then re-enable it.</p>');
