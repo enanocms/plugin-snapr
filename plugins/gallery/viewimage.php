@@ -516,7 +516,7 @@ class Namespace_Gallery extends Namespace_Default
     }
   }
   
-  function error_404($userpage = false)
+  function error_404()
   {
     echo '<h3>There is no image in the gallery with this ID.</h3>';
     echo '<p>You have requested an image that couldn\'t be looked up. Please check the URL and try again, or visit the <a href="' . makeUrlNS('Special', 'Gallery') . '">Gallery index</a>.</p>';

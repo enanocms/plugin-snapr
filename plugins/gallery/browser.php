@@ -41,7 +41,7 @@ class SnaprFormatter
    * @access private
    */
   
-  function render($column_crap, $row, $row_crap)
+  function render($column_crap, $row, $row_crap = false)
   {
     global $db, $session, $paths, $template, $plugins; // Common objects
     

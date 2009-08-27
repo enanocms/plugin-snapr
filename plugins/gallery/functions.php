@@ -102,7 +102,7 @@ function gallery_folder_hierarchy()
   
   if ( $db->numrows() < 1 )
   {
-    return array();
+    return array('_id' => 'NULL');
   }
   
   $lookup_table = array();
