@@ -16,15 +16,7 @@
 ## BROWSER INTERFACE
 ##
 
-$plugins->attachHook('base_classes_initted', '
-  global $paths;
-    $paths->add_page(Array(
-      \'name\'=>\'Image gallery\',
-      \'urlname\'=>\'Gallery\',
-      \'namespace\'=>\'Special\',
-      \'special\'=>0,\'visible\'=>1,\'comments_on\'=>0,\'protected\'=>1,\'delvotes\'=>0,\'delvote_ips\'=>\'\',
-      ));
-  ');
+$plugins->attachHook('session_started', 'register_special_page("Gallery", "Image gallery");');
 
 /**
  * Class to handle building the HTML for gallery pages. Called by the pagination function.
@@ -281,7 +273,8 @@ function page_Special_Gallery()
     
     $first_row = $row;
     
-    $db->sql_data_seek(0, $img_query);
+    if ( $db->numrows($img_query) > 0 )
+      $db->sql_data_seek(0, $img_query);
     
     /* $folders = $folders_old; */
   }
@@ -430,7 +423,8 @@ function page_Special_Gallery()
         </div>
         <div class="select-pad">&nbsp;</div>';
   
-  $db->sql_data_seek(0, $img_query);
+  if ( $db->numrows($img_query) > 0 )
+	$db->sql_data_seek(0, $img_query);
   
   //
   // Main fetcher
@@ -452,7 +446,14 @@ function page_Special_Gallery()
   $per_page = 25;
   
   $html = paginate($img_query, '{img_id}', $db->numrows($img_query), makeUrl($paths->fullpage, 'sort=' . $sort_column . '&order=' . $sort_order . '&start=%s', false), $start, $per_page, $callers, '<ul class="snapr-gallery">', '</ul><span class="menuclear"></span>');
-  echo $html;
+  if ( empty($html) )
+  {
+  	  echo '<h2 class="emptymessage">No images</h2>';
+  }
+  else
+  {
+	  echo $html;
+  }
   
   if ( $session->user_level >= USER_LEVEL_ADMIN )
   {
