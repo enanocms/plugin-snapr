@@ -16,15 +16,7 @@
 ## UPLOAD INTERFACE
 ##
 
-$plugins->attachHook('base_classes_initted', '
-  global $paths;
-    $paths->add_page(Array(
-      \'name\'=>\'Image gallery upload\',
-      \'urlname\'=>\'GalleryUpload\',
-      \'namespace\'=>\'Special\',
-      \'special\'=>0,\'visible\'=>1,\'comments_on\'=>0,\'protected\'=>1,\'delvotes\'=>0,\'delvote_ips\'=>\'\',
-      ));
-  ');
+$plugins->attachHook('session_started', 'register_special_page("GalleryUpload", "Image gallery upload");');
 
 function page_Special_GalleryUpload()
 {
@@ -806,7 +798,7 @@ function page_Special_GalleryUpload()
               break 3;
             }
             
-            $autotitle = capitalize_first_letter(basename($file));
+            $autotitle = ucwords(basename($file));
             $autotitle = substr($autotitle, 0, ( strrpos($autotitle, '.') ));
             $autotitle = str_replace('_', ' ', $autotitle);
             
@@ -894,7 +886,7 @@ function page_Special_GalleryUpload()
           break 2;
         }
         
-        $autotitle = capitalize_first_letter(basename($file['name']));
+        $autotitle = ucwords(basename($file['name']));
         $autotitle = substr($autotitle, 0, ( strrpos($autotitle, '.') ));
         $autotitle = str_replace('_', ' ', $autotitle);
         
