@@ -74,3 +74,17 @@ div.toggle div.body {
 div.toggle div.body label:hover {
   background-color: #f3f7ff;
 }
+
+/* Uploader UI */
+
+h2.uploadgoing {
+	text-align: center;
+	border-bottom-width: 0 !important;
+	text-decoration: none;
+	margin: 20px 0;
+}
+
+p.uploadstatus {
+	text-align: center;
+	margin: 10px 0;
+}

@@ -17,162 +17,168 @@
 ##
 
 $plugins->attachHook('base_classes_initted', '
-  global $paths;
-    $paths->add_page(Array(
-      \'name\'=>\'Image fetcher pagelet\',
-      \'urlname\'=>\'GalleryFetcher\',
-      \'namespace\'=>\'Special\',
-      \'special\'=>0,\'visible\'=>0,\'comments_on\'=>0,\'protected\'=>1,\'delvotes\'=>0,\'delvote_ips\'=>\'\',
-      ));
-  ');
+	global $paths;
+		$paths->add_page(Array(
+			\'name\'=>\'Image fetcher pagelet\',
+			\'urlname\'=>\'GalleryFetcher\',
+			\'namespace\'=>\'Special\',
+			\'special\'=>0,\'visible\'=>0,\'comments_on\'=>0,\'protected\'=>1,\'delvotes\'=>0,\'delvote_ips\'=>\'\',
+			));
+	');
 
 function page_Special_GalleryFetcher()
 {
-  global $db, $session, $paths, $template, $plugins; // Common objects
-  
-  // artificial race condition for debug
-  // sleep(5);
-  
-  $type = $paths->getParam(0);
-  if ( !in_array($type, array('thumb', 'preview', 'full', 'embed')) )
-  {
-    die('Hack attempt');
-  }
-  
-  $id = intval($paths->getParam(1));
-  if ( !$id )
-  {
-    die('Hack attempt');
-  }
-  
-  // Permissions object
-  $perms = $session->fetch_page_acl($id, 'Gallery');
-  
-  if ( !$perms->get_permissions('gal_full_res') && $type == 'full' )
-  {
-    $type = 'preview';
-  }
-  
-  $q = $db->sql_query('SELECT img_title, img_filename, img_time_mod, is_folder FROM '.table_prefix.'gallery WHERE img_id=' . $id . ';');
-  if ( !$q )
-    $db->_die();
-  
-  if ( $db->numrows() < 1 )
-    die('Image not found');
-  
-  $row = $db->fetchrow();
-  
-  switch ( $type )
-  {
-    case 'thumb':
-      $filename = ENANO_ROOT . '/cache/' . $row['img_filename'] . '-thumb.jpg';
-      $mimetype = 'image/jpeg';
-      $ext = "jpg";
-      break;
-    case 'preview':
-      $filename = ENANO_ROOT . '/cache/' . $row['img_filename'] . '-preview.jpg';
-      $mimetype = 'image/jpeg';
-      $ext = "jpg";
-      break;
-    case 'full':
-      $filename = ENANO_ROOT . '/files/' . $row['img_filename'];
-      $ext = get_file_extension($filename);
-      switch($ext)
-      {
-        case 'png': $mimetype = 'image/png'; break;
-        case 'gif': $mimetype = 'image/gif'; break;
-        case 'bmp': $mimetype = 'image/bmp'; break;
-        case 'jpg': case 'jpeg': $mimetype = 'image/jpeg'; break;
-        case 'tif': case 'tiff': $mimetype = 'image/tiff'; break;
-        default: $mimetype = 'application/octet-stream';
-      }
-      break;
-    case 'embed':
-      if ( !isset($_GET['width']) || !isset($_GET['height']) )
-      {
-        die('Missing width or height.');
-      }
-      $width = intval($_GET['width']);
-      $height = intval($_GET['height']);
-      if ( empty($width) || empty($height) || $width > 2048 || $height > 2048 )
-      {
-        die('Bad width or height');
-      }
-      
-      $ext = get_file_extension($row['img_filename']);
-      
-      $src_filename  = ENANO_ROOT . '/files/' . $row['img_filename'];
-      $dest_filename = ENANO_ROOT . '/cache/' . $row['img_filename'] . "-embed-$width-$height.$ext";
-      $filename =& $dest_filename;
-      
-      if ( !file_exists($dest_filename) )
-      {
-        if ( !scale_image($src_filename, $dest_filename, $width, $height, false) )
-        {
-          die('Image scaling process failed.');
-        }
-      }
-      
-      break;
-    default:
-      die('PHP...insane...');
-      break;
-  }
-  
-  // Make sure we have permission to read this image
-  if ( !$perms->get_permissions('read') )
-  {
-    $filename = ENANO_ROOT . '/plugins/gallery/denied.png';
-    $mimetype = 'image/png';
-  }
-  
-  if ( $row['is_folder'] == '1' )
-  {
-    $filename = ENANO_ROOT . '/plugins/gallery/folder.png';
-    $mimetype = 'image/png';
-  }
-  
-  if ( !file_exists($filename) )
-    die('Can\'t retrieve image file ' . $filename);
-  
-  $contents = file_get_contents($filename);
-  // expire images 30 days from now
-  $expiry = time() + ( 30 * 86400 );
-  
-  header('Content-type: '   . $mimetype);
-  header('Content-length: ' . strlen($contents));
-  header('Last-Modified: '  . date('r', $row['img_time_mod']));
-  header('Expires: ' . date('r', $expiry));
-  
-  // check for not-modified condition
-  if ( isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) )
-  {
-    $time = @strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']);
-    if ( ( !empty($time) && intval($row['img_time_mod']) <= $time ) || date('r', $row['img_time_mod']) === $_SERVER['HTTP_IF_MODIFIED_SINCE'] )
-    {
-      header('HTTP/1.1 304 Not Modified');
-      $db->close();
-      exit;
-    }
-  }
-  
-  if ( isset($_GET['download']) )
-  {
-    // determine an appropriate non-revealing filename
-    $filename = str_replace(' ', '_', $row['img_title']);
-    $filename = preg_replace('/([^\w\._-]+)/', '-', $filename);
-    $filename = trim($filename, '-');
-    $filename .= ".$ext";
-    header('Content-disposition: attachment; filename=' . $filename);
-  }
-  
-  echo $contents;
-  
-  gzip_output();
-  
-  $db->close();
-  exit;
-  
+	global $db, $session, $paths, $template, $plugins; // Common objects
+	
+	// artificial race condition for debug
+	// sleep(5);
+	
+	$type = $paths->getParam(0);
+	if ( !in_array($type, array('thumb', 'preview', 'full', 'embed')) )
+	{
+		die('Hack attempt');
+	}
+	
+	$id = intval($paths->getParam(1));
+	if ( !$id )
+	{
+		die('Hack attempt');
+	}
+	
+	// Permissions object
+	$perms = $session->fetch_page_acl($id, 'Gallery');
+	
+	if ( !$perms->get_permissions('gal_full_res') && $type == 'full' )
+	{
+		$type = 'preview';
+	}
+	
+	while ( true )
+	{
+		$q = $db->sql_query('SELECT img_title, img_filename, img_time_mod, is_folder, processed FROM '.table_prefix.'gallery WHERE img_id=' . $id . ';');
+		if ( !$q )
+			$db->_die();
+		
+		if ( $db->numrows() < 1 )
+			die('Image not found');
+		
+		$row = $db->fetchrow();
+		if ( $row['processed'] == 1 || $type == 'full' )
+			break;
+		sleep(1);
+	}
+	
+	switch ( $type )
+	{
+		case 'thumb':
+			$filename = ENANO_ROOT . '/cache/' . $row['img_filename'] . '-thumb.jpg';
+			$mimetype = 'image/jpeg';
+			$ext = "jpg";
+			break;
+		case 'preview':
+			$filename = ENANO_ROOT . '/cache/' . $row['img_filename'] . '-preview.jpg';
+			$mimetype = 'image/jpeg';
+			$ext = "jpg";
+			break;
+		case 'full':
+			$filename = ENANO_ROOT . '/files/' . $row['img_filename'];
+			$ext = get_file_extension($filename);
+			switch($ext)
+			{
+				case 'png': $mimetype = 'image/png'; break;
+				case 'gif': $mimetype = 'image/gif'; break;
+				case 'bmp': $mimetype = 'image/bmp'; break;
+				case 'jpg': case 'jpeg': $mimetype = 'image/jpeg'; break;
+				case 'tif': case 'tiff': $mimetype = 'image/tiff'; break;
+				default: $mimetype = 'application/octet-stream';
+			}
+			break;
+		case 'embed':
+			if ( !isset($_GET['width']) || !isset($_GET['height']) )
+			{
+				die('Missing width or height.');
+			}
+			$width = intval($_GET['width']);
+			$height = intval($_GET['height']);
+			if ( empty($width) || empty($height) || $width > 2048 || $height > 2048 )
+			{
+				die('Bad width or height');
+			}
+			
+			$ext = get_file_extension($row['img_filename']);
+			
+			$src_filename  = ENANO_ROOT . '/files/' . $row['img_filename'];
+			$dest_filename = ENANO_ROOT . '/cache/' . $row['img_filename'] . "-embed-$width-$height.$ext";
+			$filename =& $dest_filename;
+			
+			if ( !file_exists($dest_filename) )
+			{
+				if ( !scale_image($src_filename, $dest_filename, $width, $height, false) )
+				{
+					die('Image scaling process failed.');
+				}
+			}
+			
+			break;
+		default:
+			die('PHP...insane...');
+			break;
+	}
+	
+	// Make sure we have permission to read this image
+	if ( !$perms->get_permissions('read') )
+	{
+		$filename = ENANO_ROOT . '/plugins/gallery/denied.png';
+		$mimetype = 'image/png';
+	}
+	
+	if ( $row['is_folder'] == '1' )
+	{
+		$filename = ENANO_ROOT . '/plugins/gallery/folder.png';
+		$mimetype = 'image/png';
+	}
+	
+	if ( !file_exists($filename) )
+		die('Can\'t retrieve image file ' . $filename);
+	
+	$contents = file_get_contents($filename);
+	// expire images 30 days from now
+	$expiry = time() + ( 30 * 86400 );
+	
+	header('Content-type: '   . $mimetype);
+	header('Content-length: ' . strlen($contents));
+	header('Last-Modified: '  . date('r', $row['img_time_mod']));
+	header('Expires: ' . date('r', $expiry));
+	
+	// check for not-modified condition
+	if ( isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) )
+	{
+		$time = @strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']);
+		if ( ( !empty($time) && intval($row['img_time_mod']) <= $time ) || date('r', $row['img_time_mod']) === $_SERVER['HTTP_IF_MODIFIED_SINCE'] )
+		{
+			header('HTTP/1.1 304 Not Modified');
+			$db->close();
+			exit;
+		}
+	}
+	
+	if ( isset($_GET['download']) )
+	{
+		// determine an appropriate non-revealing filename
+		$filename = str_replace(' ', '_', $row['img_title']);
+		$filename = preg_replace('/([^\w\._-]+)/', '-', $filename);
+		$filename = trim($filename, '-');
+		$filename .= ".$ext";
+		header('Content-disposition: attachment; filename=' . $filename);
+	}
+	
+	echo $contents;
+	
+	gzip_output();
+	
+	$db->close();
+	exit;
+	
 }
 
 ?>

@@ -1,13 +1,13 @@
 <?php
 /**!info**
 {
-  "Plugin Name"  : "Snapr",
-  "Plugin URI"   : "http://enanocms.org/plugin/snapr",
-  "Description"  : "Provides an intuitive image gallery system with a browser, viewer for individual images, upload interface, and comment system integration.",
-  "Author"       : "Dan Fuhry",
-  "Version"      : "0.1b3",
-  "Author URI"   : "http://enanocms.org/",
-  "Version list" : ['0.1b1', '0.1b2', '0.1 beta 3', '0.1b3']
+	"Plugin Name"  : "Snapr",
+	"Plugin URI"   : "http://enanocms.org/plugin/snapr",
+	"Description"  : "Provides an intuitive image gallery system with a browser, viewer for individual images, upload interface, and comment system integration.",
+	"Author"       : "Dan Fuhry",
+	"Version"      : "0.1b4",
+	"Author URI"   : "http://enanocms.org/",
+	"Version list" : ['0.1b1', '0.1b2', '0.1 beta 3', '0.1b3', '0.1b4']
 }
 **!*/
 
@@ -17,35 +17,37 @@ define('GALLERY_VERSION', '0.1b2');
 
 if ( !defined('ENANO_ATLEAST_1_1') )
 {
-  $fn = basename(__FILE__);
-  setConfig("plugin_$fn", '0');
-  die_semicritical('Snapr can\'t load on this site', '<p>This version of Snapr requires Enano 1.1.6 or later.</p>');
+	$fn = basename(__FILE__);
+	setConfig("plugin_$fn", '0');
+	die_semicritical('Snapr can\'t load on this site', '<p>This version of Snapr requires Enano 1.1.6 or later.</p>');
 }
 
 $magick_path = getConfig('imagemagick_path', '/usr/bin/convert');
 $have_gd_scale_support = function_exists('imagecreatetruecolor') && function_exists('imagejpeg') && function_exists('imagecopyresampled');
 if ( (!file_exists($magick_path) || !is_executable($magick_path)) && !$have_gd_scale_support )
 {
-  $fn = basename(__FILE__);
-  // set disabled flag with new plugin system
-  if ( defined('ENANO_ATLEAST_1_1') && defined('PLUGIN_DISABLED') )
-  {
-    $q = $db->sql_query('UPDATE ' . table_prefix . "plugins SET plugin_flags = plugin_flags | " . PLUGIN_DISABLED . " WHERE plugin_filename = 'Gallery.php';");
-    if ( !$q )
-      $db->_die();
+	$fn = basename(__FILE__);
+	// set disabled flag with new plugin system
+	if ( defined('ENANO_ATLEAST_1_1') && defined('PLUGIN_DISABLED') )
+	{
+		$q = $db->sql_query('UPDATE ' . table_prefix . "plugins SET plugin_flags = plugin_flags | " . PLUGIN_DISABLED . " WHERE plugin_filename = 'Gallery.php';");
+		if ( !$q )
+			$db->_die();
 	  
-    // kill off cache
-    global $cache;
-    $cache->purge('plugins');
-  }
-  else
-  {
-    // old plugin system
-    setConfig("plugin_$fn", '0');
-  }
-  
-  die_semicritical('Snapr can\'t load on this site', '<p>You must have ImageMagick or GD installed and working to use this plugin. The plugin has been disabled, please setup ImageMagick and then re-enable it.</p>');
+		// kill off cache
+		global $cache;
+		$cache->purge('plugins');
+	}
+	else
+	{
+		// old plugin system
+		setConfig("plugin_$fn", '0');
+	}
+	
+	die_semicritical('Snapr can\'t load on this site', '<p>You must have ImageMagick or GD installed and working to use this plugin. The plugin has been disabled, please setup ImageMagick and then re-enable it.</p>');
 }
+
+$plugins->attachHook('pgsql_set_serial_list', '$primary_keys[table_prefix."gallery"] = "img_id";');
 
 /**!install dbms="mysql"; **
 
@@ -59,6 +61,7 @@ CREATE TABLE {{TABLE_PREFIX}}gallery(
 	img_filename varchar(255) NOT NULL,
 	img_time_upload int(12) NOT NULL DEFAULT 0,
 	img_time_mod int(12) NOT NULL DEFAULT 0,
+	img_author int(12) NOT NULL DEFAULT 1,
 	img_tags longtext,
 	PRIMARY KEY ( img_id )
 );
@@ -89,6 +92,14 @@ ALTER TABLE {{TABLE_PREFIX}}gallery ADD COLUMN img_tags longtext;
 **!*/
 
 /**!upgrade dbms="mysql"; from="0.1 beta 3"; to="0.1b3"; **
+**!*/
+
+/**!upgrade dbms="mysql"; from="0.1b3"; to="0.1b4"; **
+ALTER TABLE {{TABLE_PREFIX}}gallery ADD COLUMN img_author int(12) NOT NULL DEFAULT 1;
+ALTER TABLE {{TABLE_PREFIX}}gallery ADD COLUMN processed tinyint(1) NOT NULL DEFAULT 1;
+-- Set all images to authorship by the first administrator we can find
+UPDATE {{TABLE_PREFIX}}gallery SET img_author = ( SELECT user_id FROM {{TABLE_PREFIX}}users WHERE user_level = 9 ORDER BY user_id DESC LIMIT 1 ), processed = 1;
+
 **!*/
 
 require( ENANO_ROOT . '/plugins/gallery/functions.php' );
