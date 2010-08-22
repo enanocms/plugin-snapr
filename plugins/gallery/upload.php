@@ -223,7 +223,7 @@ function page_Special_GalleryUpload()
 			}
 			$idlist = implode(',', $idlist);
 			echo '<div class="idlist">[' . $idlist . ']</div>';
-			echo 'Images uploaded successfully. Please <a href="' . makeUrlNS('Special', 'GalleryUpload', "edit_img=$idlist") . '">click here to continue</a>.';
+			echo '<noscript>Images uploaded successfully. Please <a href="' . makeUrlNS('Special', 'GalleryUpload', "edit_img=$idlist") . '">click here to continue</a>.</noscript>';
 			//snapr_editform($idlist);
 			return;
 		}
