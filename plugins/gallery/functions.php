@@ -434,22 +434,29 @@ function snapr_process_image($image_id)
  * @return int image ID
  */
 
-function snapr_insert_image($path, $folder_id = NULL)
+function snapr_insert_image($path, $folder_id = NULL, $orig_filename = false)
 {
 	global $db, $session, $paths, $template, $plugins; // Common objects
 	
-	$ext = get_file_extension($path);
+	$usename = $orig_filename ? $orig_filename : $path;
+	$ext = get_file_extension($usename);
 	$ourfilename = gallery_make_filename() . "." . strtolower($ext);
 	if ( !snapr_extension_allowed($ext) )
+	{
+		echo "Banned extension: $ext";
 		return false;
+	}
 	
 	// copy the file to the storage folder
 	if ( !rename($path, ENANO_ROOT . "/files/$ourfilename") )
+	{
+		echo "Rename failed: $path -&gt; files/$ourfilename";
 		return false;
+	}
 	
 	// insert the image into the database
 	$folder = $folder_id === NULL ? 'NULL' : strval(intval($folder_id));
-	$title = ucwords(str_replace('_', ' ', basename($path)));
+	$title = ucwords(str_replace('_', ' ', $usename));
 	$title = preg_replace("/\.{$ext}\$/i", '', $title);
 	$sz = serialize(array());
 	$now = time();

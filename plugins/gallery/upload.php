@@ -205,7 +205,7 @@ function page_Special_GalleryUpload()
 				if ( snapr_extension_allowed($ext) )
 				{
 					// normal image
-					$result = snapr_insert_image($files['tmp_name'][$i], $destfolder);
+					$result = snapr_insert_image($files['tmp_name'][$i], $destfolder, $files['name'][$i]);
 					if ( $result !== false )
 						$idlist[] = $result;
 				}
